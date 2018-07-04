@@ -11,10 +11,12 @@ addpath(fullfile(this_repo_path, 'examples_tests'));
 
 test_box_random_surface_point; close all
 test_cylinder_random_surface_point; close all
+test_transform_discs; close all
 fprintf('Folgende Funktionen erfolgen die manuelle Bestätigung.\n');
 
 test_intersection_box; close all
 test_intersection_functions; close all
+
 
 clc
 close all
