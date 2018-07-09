@@ -11,7 +11,7 @@ T = [     0    0.9400   -0.3400  -50.0000
     -0.2600    0.3300    0.9100   30.0000
           0         0         0    1.0000];
 % transform cylinder
-[x,y,z]=transfrom_disc(X,Y,Z,T);
+[x,y,z]=transform_disc(X,Y,Z,T);
 % define plot color
 C = [0.5,0.5,0.5];
 % plot transformed cylinder
