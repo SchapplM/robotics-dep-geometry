@@ -9,6 +9,10 @@ Moritz Schappler, schappler@imes.uni-hannover.de, 2018-03
 
 Für die Benutzung des Repos muss die Pfadinitialisierung durchgeführt werden mit dem Skript `geometry_toolbox_path_init.m` aus dem Hauptordner.
 
+### Abhängigkeiten
+
+Einige Modultests benötigen das Repo `matlab-ext` mit externen Funktionen und Toolboxen.
+
 ### Modultests
 
 Die einzelnen Funktionen des Repos können über die Modultests aus dem Ordner `examples_tests` gestartet werden. Die Funktionsfähigkeit des Gesamt-Repos kann mit dem Gesamt-Testskript `geometry_toolbox_test_repo.m` aus dem Hauptordner geprüft werden.
