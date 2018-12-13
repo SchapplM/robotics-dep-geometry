@@ -8,7 +8,7 @@ close all
 clear
 
 %% Definiere zufälligen Quader
-R_0_i = rpy2r(rand(3,1) );
+R_0_i = eulxyz2r(rand(3,1) );
 r_0_Q1 = R_0_i*[0.2 0.2 0.2]';
 r_0_Q1Q2 = R_0_i*[0.4 0 0]';% [0.4 0.3 0]';
 r_0_Q1Q3 = R_0_i*[0 0.3 0]'; % [0.1 0.5 0.2]'

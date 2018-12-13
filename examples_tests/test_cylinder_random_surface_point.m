@@ -9,7 +9,7 @@ close all
 clear
 
 %% Definiere zufälligen Zylinder
-R_0_i = rpy2r(rand(3,1) );
+R_0_i = eulxyz2r(rand(3,1) );
 r_0_P1 = R_0_i*[0 0 0.2]';
 r_0_P2 = R_0_i*[0 0 0.4]';% [0.4 0.3 0]';
 r_zyl = 0.3;
