@@ -47,7 +47,11 @@ for i=1:length(ps(1,:))
   pts = find_intersection_line_box(p, u, q, u1, u2, u3);
   p_goal = p+(pts(:,1)-p).'*u/(u.'*u)*u;
   figure(1);hold on;
-  plot_cube2(q, u1, u2, u3, 'b');
+  set(1,'units','normalized','outerposition',[0 0 1 1]);
+  cubpar_c = q+(u1+u2+u3)/2; % Mittelpunkt des Quaders
+  cubpar_l = [norm(u1); norm(u2); norm(u3)]; % Dimension des Quaders
+  cubpar_a = 180/pi*r2eulzyx([u1/norm(u1), u2/norm(u2), u3/norm(u3)]); % Orientierung des Quaders
+  drawCuboid([cubpar_c', cubpar_l', cubpar_a'], 'FaceColor', 'b', 'FaceAlpha', 0.3);
   plot3([p(1)-10*u(1) p(1)+10*u(1)]', [p(2)-10*u(2) p(2)+10*u(2)]', [p(3)-10*u(3) p(3)+10*u(3)]','b');
   plot3([pts(1,1) p_goal(1)]', [pts(2,1) p_goal(2)]', [pts(3,1) p_goal(3)]','r');
   scatter3(pts(1,:),pts(2,:),pts(3,:),50,'r','filled');
@@ -74,7 +78,11 @@ for i=1:10
   pts = find_intersection_line_box(p,u,q,u1,u2,u3);
   p_goal = p+(pts(:,1)-p).'*u/(u.'*u)*u;
   figure(1);hold on;
-  plot_cube2(q, u1, u2, u3, 'b');
+  set(1,'units','normalized','outerposition',[0 0 1 1]);
+  cubpar_c = q+(u1+u2+u3)/2; % Mittelpunkt des Quaders
+  cubpar_l = [norm(u1); norm(u2); norm(u3)]; % Dimension des Quaders
+  cubpar_a = 180/pi*r2eulzyx([u1/norm(u1), u2/norm(u2), u3/norm(u3)]); % Orientierung des Quaders
+  drawCuboid([cubpar_c', cubpar_l', cubpar_a'], 'FaceColor', 'b', 'FaceAlpha', 0.3);
   plot3([p(1)-10*u(1) p(1)+10*u(1)]', [p(2)-10*u(2) p(2)+10*u(2)]', [p(3)-10*u(3) p(3)+10*u(3)]','b');
   plot3([pts(1,1) p_goal(1)]', [pts(2,1) p_goal(2)]', [pts(3,1) p_goal(3)]','r');
   scatter3(pts(1,:),pts(2,:),pts(3,:),50,'r','filled');

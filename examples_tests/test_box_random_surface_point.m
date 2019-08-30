@@ -27,7 +27,10 @@ for jj = 1:4
   figure(jj);clf;
   clf; 
   hold on; grid on;axis equal;view(3);set(jj, 'Renderer','OpenGL');
-  plot_cube2(r_0_Q1, r_0_Q1Q2, r_0_Q1Q3, r_0_Q1Q4, 'b');
+  cubpar_c = r_0_Q1+(r_0_Q1Q2+r_0_Q1Q3+r_0_Q1Q4)/2; % Mittelpunkt des Quaders
+  cubpar_l = [norm(r_0_Q1Q2); norm(r_0_Q1Q3); norm(r_0_Q1Q4)]; % Dimension des Quaders
+  cubpar_a = 180/pi*r2eulzyx(R_0_i); % Orientierung des Quaders
+  drawCuboid([cubpar_c', cubpar_l', cubpar_a'], 'FaceColor', 'b', 'FaceAlpha', 0.3);
 
   if jj < 4
     for i = 1:100
