@@ -21,6 +21,8 @@ Die einzelnen Funktionen des Repos können über die Modultests aus dem Ordner `
 
 Hier erfolgt eine kurze Übersicht der im Repo enthaltenen Funktionen. Die Funktionsweise ist in den jeweiligen Funktionsdateien und Modultests erklärt.
 
+* Geometrische Berechnungen
+  * Spannbreite einer Menge von Winkeln: `angle_range.m`
 * Schnittpunktberechnungen
   * Kreis-Kreis: `intersect_circles.m`
   * Linie-Quader: `find_intersection_line_box.m`

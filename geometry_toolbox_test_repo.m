@@ -17,6 +17,7 @@ fprintf('Folgende Funktionen erfolgen die manuelle Bestätigung.\n');
 test_intersection_box; close all
 test_intersection_functions; close all
 
+test_angle_range
 
 clc
 close all
