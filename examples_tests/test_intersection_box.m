@@ -6,7 +6,7 @@ q = [0 0 0]';
 u1 = [1 0 0]';
 u2 = [0 2 0]';
 u3 = [0 0 3]';
-% Testf�lle:
+% Testfälle:
 % zwei Seiten nebeneinander x-y
 ps = [0.3 1.5 1]';% [0.3 0.5 1]' [0.7 0.5 1]' [0.7 1.5 1]'];
 us = [1 1 0]';%     [1 -1 0]'    [1 1 0]'     [1 -1 0]'];
@@ -16,7 +16,7 @@ us = [us [0 1 -1]'];%      [0 1 1]'       [0 1 -1]'      [0 1 1]'];
 % zwei Seiten nebeneinander x-z
 ps = [ps [0.3 1 0.5]'];% [0.3 1 2.5]' [0.7 1 0.5]' [0.7 1 2.5]'];
 us = [us [1 0 -1]'];%    [1 0 1]'     [1 0 1]'     [1 0 -1]'];
-% zwei Seiten gegen�ber
+% zwei Seiten gegenüber
 ps = [ps [0.5 0.5 0.5]'];% [0.5 0.5 0.5]' [0.5 0.5 0.5]'];
 us = [us [1 0 0]'];%       [0 1 0]'       [0 0 1]'];
 % in Ebene durch Kante und Ecke
@@ -34,10 +34,10 @@ us = [us [1 1 0]'];
 % entlang Kante
 ps = [ps [0.5 0 0]'];
 us = [us [1 0 0]'];
-% Kein SP, n�chster Pkt an Kante
+% Kein SP, nächster Pkt an Kante
 ps = [ps [0.4 -0.6 1.5]'];
 us = [us [1 -1 0]'];
-% Kein SP, n�chster Pkt an Ecke
+% Kein SP, nächster Pkt an Ecke
 ps = [ps [0.4 -0.6 0]'];
 us = [us [1 -1 0]'];
 for i=1:length(ps(1,:))

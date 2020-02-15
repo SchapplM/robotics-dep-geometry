@@ -21,15 +21,15 @@
 
 function pts = find_intersection_line_box(p, u, q, u1, u2, u3)
   % Idee: homogene transformation der geraden und der Box in ein
-  % Koordinatensystem, wo die box ein Einheitsw�rfel mit einer ecke im
+  % Koordinatensystem, wo die box ein Einheitswürfel mit einer ecke im
   % Ursprung und einer bei [1 1 1] ist. Die inverse Rotationsmatrix
   % wird aus u1 u2 und u3 gebildet: R_inv = [u1 u2 u3] => diag(1/ui^2)*R_inv^T
-  % damit m�ssen nur die Schnittpunkte der transformierten geraden mit den
+  % damit müssen nur die Schnittpunkte der transformierten geraden mit den
   % ebenen x/y/z=0/1 berechnet werden und die erhaltenen Parameter nach
-  % Gr��e geordnet werden. Liegen Schnittpunkte vor, geh�ren die beiden
+  % Größe geordnet werden. Liegen Schnittpunkte vor, gehüren die beiden
   % mittleren Parameter in der Liste zu diesen. Anderenfalls muss der zur
-  % gerade n�chste Punkt auf dem W�rfel berechnet werden. Nach der
-  % Berechnung muss noch die R�cktransformation durchgef�hrt werden.
+  % gerade nächste Punkt auf dem Würfel berechnet werden. Nach der
+  % Berechnung muss noch die Rücktransformation durchgeführt werden.
   
   assert(isa(p,'double') && isreal(p) && all(size(p) == [3 1]), ...
     'find_intersection_line_box: p has to be [3x1] double');  
@@ -60,10 +60,10 @@ function pts = find_intersection_line_box(p, u, q, u1, u2, u3)
 
   i_krit = length(t2)/2;
   if (any(pt+t2(i_krit)*ut>1+1e-10) || any(pt+t2(i_krit)*ut<-1e-10) || any(pt+t2(i_krit+1)*ut>1+1e-10) || any(pt+t2(i_krit+1)*ut<-1e-10)) % keine Schnittpunkte
-    % Finde n�chsten Punkt zu den Zw�lf Kanten und den 8 Ecken und nehme
-    % das Minimum (bei den Kanten muss die Korrektheit gepr�ft werden, also
-    % ob der Punkt auf der Kante liegt). F�r die Ecken berechnen wir den
-    % Abstand zur geraden mit d=|(e-p) x u|/|u|, f�r die Kanten e+ui*t mit
+    % Finde nächsten Punkt zu den Zwölf Kanten und den 8 Ecken und nehme
+    % das Minimum (bei den Kanten muss die Korrektheit geprüft werden, also
+    % ob der Punkt auf der Kante liegt). Für die Ecken berechnen wir den
+    % Abstand zur geraden mit d=|(e-p) x u|/|u|, für die Kanten e+ui*t mit
     % d=|(e-p)*(u x ui)|/|u x ui|.
     d_min = norm(cross(p-q,u))/norm(u);
     p_c = q;
@@ -100,7 +100,7 @@ function pts = find_intersection_line_box(p, u, q, u1, u2, u3)
 end
   
 
-% Hilfsfunktion, um zu �berpr�fen, ob eine Ecke den akteullen
+% Hilfsfunktion, um zu Überprüfen, ob eine Ecke den akteullen
 % Minmalabstand unterbietet
 function [d_min, p_c] = check_corner(c,p,u,p_c,d_min)
   d = norm(cross(p-c,u))/norm(u);
@@ -110,11 +110,11 @@ function [d_min, p_c] = check_corner(c,p,u,p_c,d_min)
   end
 end
 
-% Hilfsfunktion, um zu �berpr�fen, ob eine Kante den aktuellen
+% Hilfsfunktion, um zu Überprüfen, ob eine Kante den aktuellen
 % Minmalabstand unterbietet
 function [d_min, p_c] = check_edge(e, ui, cuiu, cucuiu,p,p_c,d_min)
   d = norm((p-e).'*cuiu)/norm(cuiu);
-  if d>eps % Wenn die gerade in einer Ebene zur Kante verl�uft, ist das Ergebnis mit den Ecken abgedeckt, da ja kein regul�rer SP vorliegt
+  if d>eps % Wenn die gerade in einer Ebene zur Kante verläuft, ist das Ergebnis mit den Ecken abgedeckt, da ja kein regulärer SP vorliegt
     if d<d_min
       t_k = (p-e).'*cucuiu/(cuiu.'*cuiu);
       if t_k>-eps && t_k<1+eps % wenn t zwischen 0 und 1, dann liegt der kritische Punkt auf der Kante
