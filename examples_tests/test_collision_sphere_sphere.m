@@ -18,35 +18,50 @@ matlabfcn2mex({ ...
   });
 
 %% Teste Kollision aus Kugel und Kugel
-for i = 1:3
+for i = 1:5
   %% Parameter einstellen
   p1 = [0.0;0.0;0.0];
   r1  = 0.1;
   switch i
-  case 1 % Keine Kollision
+  case 1
+    tt = 'Keine Kollision';
     p2 = [0.2;0.3;0.2];
     r2  = 0.15;
     kol_groundtruth = false;
-  case 2 % Kollision
+  case 2
+    tt = 'Kollision';
     p2 = [0.1;0.2;0.2];
     r2  = 0.3;
     kol_groundtruth = true;
-  case 3 % Vollständige Durchdringung
+  case 3
+    tt = 'Zweite Kugel vollständig enthalten';
     p2 = [0.1;0.2;0.2];
+    r2  = 0.5;
+    kol_groundtruth = true;
+  case 4
+    tt = 'Vollständig enthalten und identische Größe';
+    p2 = p1;
+    r2  = r1;
+    kol_groundtruth = true;
+  case 5
+    tt = 'Vollständig enthalten und exakt mittig';
+    p2 = p1;
     r2  = 0.5;
     kol_groundtruth = true;
   end
   %% Kollision berechnen
   [dist, kol, pkol, d_min] = collision_sphere_sphere([p1',r1], [p2',r2]);
   %% Zeichnen
-  figure(1); clf; hold on;
-  drawSphere([p1; r1]','FaceColor', 'b', 'FaceAlpha', 0.3)
+  figure(i); clf; hold on;
+  drawSphere([p1; r1]','FaceColor', 'b', 'FaceAlpha', 0.3, 'linestyle', '--')
   drawSphere([p2; r2]','FaceColor', 'r', 'FaceAlpha', 0.3, 'linestyle', ':');
-  plot3(pkol(:,1), pkol(:,2), pkol(:,3), '-kx', 'MarkerSize', 5, 'LineWidth', 3)
+  plot3(pkol(:,1), pkol(:,2), pkol(:,3), '-gx', 'MarkerSize', 5, 'LineWidth', 3)
   xlabel('x in m'); ylabel('y in m'); zlabel('z in m');
-  view(3); grid on;
+  view(3); grid on; axis equal;
+  title(sprintf('Fall %d: %s', i, tt));
   %% Prüfung
   % Rechnerische Prüfung der Ergebnisse
+  assert(all(~isnan([dist(:); pkol(:); d_min(:)])), 'Ausgabe sollte nicht NaN sein');
   assert(abs(norm(pkol(1, :) - pkol(2, :)) - abs(dist)) < 1e-12, ...
     'Abstand und Kollisionspunkte stimmen nicht überein');
   assert((dist<0) == kol, 'Negativer Abstand ohne gemeldete Kollision (oder umgekehrt)');

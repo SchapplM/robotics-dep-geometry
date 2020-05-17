@@ -30,11 +30,21 @@ assert(isa(Kug1,'double') && isreal(Kug1) && all(size(Kug1) == [1 4]) && ...
 % Abstand mit Radien vergleichen
 d_min = - (Kug1(4) + Kug2(4));
 dist = dnorm - (Kug1(4) + Kug2(4));
-if dist < 0
+if dist <= 0 % Kollision
   kol = true;
-else
+  if dnorm > 1e-12 % normaler Fall (nicht exakt identischer Mittelpunkt)
+    % (bei dnorm nahe eps treten numerische Probleme auf)
+    v = d';
+    vnorm = dnorm;
+  else % Kugeln exakt mit selbem Mittelpunkt. Kürzester Abstand nicht eindeutig
+    v = [0,0,1]; % beliebiger Vektor
+    vnorm = 1;
+  end
+else % keine Kollision
   kol = false;
+  v = d'; % Abstand ist immer eindeutig. Keine Unterscheidung wie oben notwendig.
+  vnorm = dnorm;
 end
-pkol = zeros(2, 3);
-pkol(1, :) = Kug1(1:3)+d'/dnorm*Kug1(4);
-pkol(2, :) = Kug2(1:3)-d'/dnorm*Kug2(4);
+pkol = NaN(2,3);
+pkol(1, :) = Kug1(1:3)+v/vnorm*Kug1(4);
+pkol(2, :) = Kug2(1:3)-v/vnorm*Kug2(4);

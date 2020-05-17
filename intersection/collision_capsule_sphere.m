@@ -39,17 +39,41 @@ Gerade = [rg', ug']; Punkt = Kug(1:3);
 % Prüfe kürzeste Entfernung zur Ersatz-Geraden
 [dnorm, d, lambda, pg] = distance_line_point(Gerade, Punkt);
 pkol = zeros(2, 3);
-% Kugel liegt am ersten Ende des Zylinders
-if lambda <= 0
-  [dnorm, d] = distance_point_point(Kug(1:3), rg');
-  pkol(2, :) = rg' - d'/dnorm*rz; % Punkt auf Zylinder-Anfang
-  pkol(1, :) = Kug(1:3) + d'/dnorm*rk; % Punkt auf Kugeloberfläche
-% am zweiten Ende
-elseif lambda >= 1
-  [dnorm, d] = distance_point_point(Kug(1:3), rg'+ug');
-  pkol(2, :) = rg' + ug' - d'/dnorm*rz; % Punkt auf Zylinder-Ende
-  pkol(1, :) = Kug(1:3) + d'/dnorm*rk; % Punkt auf Kugeloberfläche
-% Dazwischen
+% Kugel liegt an einem Ende des Zylinders. Kollision mit Halbkugel möglich
+if lambda <= 0 || lambda >= 1
+  if lambda <= 0
+    p = rg; % Erste Halbkugel der Kapsel -> setze lambda=0
+  else
+    p = rg+ug; % Zweite Halbkugel der Kapsel -> setze lambda=1
+  end
+  % Siehe collision_sphere_sphere. Hier aber Anpassung der
+  % Durchdringungsrichtung je nach Ausrichtung der Kapsel.
+  % Ansonsten kann die Verbindung nur innerhalb der Kapsel liegen ohne
+  % Verbindung mit der Außenfläche.
+  % Richtung in collision_sphere_sphere bei Identität nicht definiert.
+  [dnorm, d] = distance_point_point(p', Kug(1:3));
+  d_min = - (rz+rk);
+  dist = dnorm - (rz+rk);
+  if dist <= 0 % Kollision zwischen Halbkugel und Kugel
+    kol = true;
+    if dnorm > 1e-12 % normaler Fall (nicht exakt identischer Mittelpunkt)
+      % (bei dnorm nahe eps treten numerische Probleme auf)
+      v = -d'; % eindeutiger Abstandsvektor bestimmt
+      vnorm = dnorm;
+    else % Kugeln exakt mit selbem Mittelpunkt. Kürzester Abstand nicht eindeutig
+      v = ug'; % Vektor entspricht Kapsel-Ausrichtung
+      vnorm = norm(ug);
+    end
+  else % keine Kollision
+    kol = false;
+    v = -d'; % Abstand ist immer eindeutig. Keine Unterscheidung wie oben notwendig.
+    vnorm = dnorm;
+  end
+  pkol = NaN(2,3);
+  pkol(1, :) = Kug(1:3)+v/vnorm*rk; % Kollisionspunkt an Kugel
+  pkol(2, :) = p'-v/vnorm*rz; % Punkt an Halbkugel der Kapsel
+% Kugel liegt zwischen Enden des Zylinders. Kollision mit Mantelfläche ist
+% möglich
 else
   if dnorm > 1e-12 % alles in Ordnung.
     v = d';
@@ -68,10 +92,10 @@ else
   end
   pkol(2, :) = pg' + v/vnorm*rz; % Punkt auf dem Zylinder-Mantel
   pkol(1, :) = Kug(1:3)-v/vnorm*rk; % Punkt auf Kugeloberfläche
-end
 
-% Abstand mit Radien vergleichen
-d_min = - (rk + rz);
-dist = dnorm - (rk + rz);
-if dist < 0, kol = true;
-else,        kol = false; end
+  % Abstand mit Radien vergleichen
+  d_min = - (rk + rz);
+  dist = dnorm - (rk + rz);
+  if dist < 0, kol = true;
+  else,        kol = false; end
+end

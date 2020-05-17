@@ -2,7 +2,8 @@
 % Eine Kapsel ist ein Zylinder mit Halbkugeln als Enden
 % 
 % Eingabe:
-% Zyl1, Zyl2: 1x7 Kapsel-Darstellung (Pkt 1, Pkt 2, Radius)
+% Kap11, Kap2 [1x7]
+%   Kapsel-Darstellung (Pkt 1, Pkt 2, Radius)
 % 
 % Ausgabe:
 % dist
@@ -30,8 +31,11 @@ ug = Kap1(4:6)'-Kap1(1:3)'; uh = Kap2(4:6)'-Kap2(1:3)'; % Richtungsvektoren der 
 rad1 = Kap1(7); rad2 = Kap2(7); % Radien der Zylinder
 [dnorm, d, lambda, mu, pg, ph] = distance_line_line([rg', ug'], [rh', uh']);
 
-% Punkte des kürzesten Abstandes liegen auf Zylindermanteln
-if ~any([lambda, mu]<0) && ~any([lambda, mu]>1)
+% Punkte des kürzesten Abstandes liegen auf Zylindermanteln.
+% Das heißt: mu und lambda sind (beide) zwischen 0 und 1
+% Benutze Abfrage >=1, da Ergebnis lambda=1+eps möglich ist. Dann
+% divergiert die Lösung aus der mex-Datei mit der Matlab-Funktion.
+if all([mu, lambda]>=0 & [mu, lambda]<=1)
   if dnorm > 1e-12 % alles in Ordnung.
     v = d';
     vnorm = dnorm;
@@ -78,7 +82,7 @@ elseif all([lambda, mu]<=0 | [lambda, mu] >=1)
   [dist, kol, pkol, d_min] = collision_sphere_sphere([Punkt1,rad1],[Punkt2,rad2]);
   
 % Ein Punkt des kürzesten Abstandes liegt auf Zylindermantel, der
-% andere auf Anfangs- oder Endhalbkugel des anderen Zylinders
+% andere auf Anfangs- oder Endhalbkugel der anderen Kapsel
 else
   % Prüfe Abstand eines Zylinders zu den Endpunkten
 
