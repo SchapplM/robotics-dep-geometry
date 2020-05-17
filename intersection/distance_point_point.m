@@ -10,13 +10,11 @@
 % dnorm 1x1: Betrag des Abstandes
 % d 3x1: Vektor des Abstandes von Punkt1 zu 2
 % 
-% 
-% Siehe auch: Abstand_Gerade_Punkt,
-% Kollision_Kugel_Kugel, Kollision_Kapsel_Kugel
+% Siehe auch: distance_line_point, collision_sphere_sphere,
+% collision_capsule_sphere 
 
 % Moritz Schappler, moritz.schappler@imes.uni-hannover.de, 2013-07
 % (C) Institut für Mechatronische Systeme, Leibniz Universität Hannover
-
 
 function [dnorm, d] = distance_point_point(Punkt1, Punkt2)
 

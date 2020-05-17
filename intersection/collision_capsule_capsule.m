@@ -1,30 +1,29 @@
 % Berechne Kollision und Abstand zweier Kapseln
-% 
-% [dist, kol, pkol] = Kollision_Kapsel_Kapsel(Kap1, Kap2)
 % Eine Kapsel ist ein Zylinder mit Halbkugeln als Enden
 % 
 % Eingabe:
 % Zyl1, Zyl2: 1x7 Kapsel-Darstellung (Pkt 1, Pkt 2, Radius)
 % 
 % Ausgabe:
-% dist: Abstand der Kapsel-Hüllen
-% kol: 1 falls Kollision, sonst 0
-% pkol: 2x3; 2 Punkte des kürzesten Abstandes
-% d_min: 1x1;  Minimaler Abstand (negativ) der beiden Körper
+% dist
+%   Abstand der Kapsel-Hüllen
+% kol
+%   true falls Kollision, sonst false
+% pkol [2x3]
+%   2 Punkte des kürzesten Abstandes
+% d_min [1x1]
+%   Minimaler Abstand (negativ) der beiden Körper
 
 % Moritz Schappler, moritz.schappler@imes.uni-hannover.de, 2013-07
 % (C) Institut für Mechatronische Systeme, Leibniz Universität Hannover
-
 
 function [dist, kol, pkol, d_min] = collision_capsule_capsule(Kap1, Kap2)
 
 %% Coder Information
 %#codegen
 assert(isa(Kap1,'double') && isreal(Kap1) && all(size(Kap1) == [1 7]) && ... 
-     isa(Kap2,'double') && isreal(Kap2) && all(size(Kap2) == [1 7]));
-   
+       isa(Kap2,'double') && isreal(Kap2) && all(size(Kap2) == [1 7]));
 %% Algorithmus
-
 % Umwandlung in Geraden in Parameterform
 rg = Kap1(1:3)'; rh = Kap2(1:3)'; % Anfangspunkte der Geraden
 ug = Kap1(4:6)'-Kap1(1:3)'; uh = Kap2(4:6)'-Kap2(1:3)'; % Richtungsvektoren der Geraden
@@ -33,42 +32,50 @@ rad1 = Kap1(7); rad2 = Kap2(7); % Radien der Zylinder
 
 % Punkte des kürzesten Abstandes liegen auf Zylindermanteln
 if ~any([lambda, mu]<0) && ~any([lambda, mu]>1)
-  pkol = [pg'+d'/dnorm*Kap1(7); ph'-d'/dnorm*Kap2(7)];
+  if dnorm > 1e-12 % alles in Ordnung.
+    v = d';
+    vnorm = dnorm;
+  else
+    % Falls die Kugel zufälligerweise genau auf der Mittellinie ist, ist
+    % die Richtung nicht bestimmt. Nehme beliebige Richtung senkrecht auf
+    % der ersten Zylinderachse. Die Richtung hat hier Einfluss auf das
+    % Ergebnis. TODO: Die Wahl ist vielleicht noch nicht sinnvoll, da nicht
+    % die Längste Verbindung gewählt wird.
+    if ug(1)~=ug(3) % so senkrecht mit folgender Operation
+      v = cross(ug, flipud(ug))';
+    else
+      v = ug([1 3 2]); % beliebiger anderer Vektor, da erster nicht geht
+    end
+    vnorm = norm(v);
+  end
+  pkol = [pg'+v/vnorm*Kap1(7); ph'-v/vnorm*Kap2(7)];
   % Abstand der Linien mit Radien der Zylinder vergleichen
   d_min = - (Kap1(7) + Kap2(7)); 
   dist = dnorm - (Kap1(7) + Kap2(7));
   if dist < 0
-    kol = 1;
+    kol = true;
   else
-    kol = 0;
+    kol = false;
   end
-  
-  
+
 % Beide Punkte des kürzesten Abstandes liegen auf 
-% Deckel- oder Bodenfläche der Zylinder
-elseif all( uint8([lambda, mu]<=0) + uint8([lambda, mu] >=1) )
-  % Prüfe Abstand von zwei Endpunkten
-  if lambda <= 0
-    Punkt1 = rg';
-  else % lambda >= 1
-    Punkt1 = rg'+ug';
+% Deckel- oder Bodenfläche der Zylinder bzw. der Halbkugeln
+elseif all([lambda, mu]<=0 | [lambda, mu] >=1)
+  % Prüfe, welcher Endpunkt am nächsten an einem anderen Endpunkt liegt
+  [dnorm11, ~] = distance_point_point(rg', rh');
+  [dnorm21, ~] = distance_point_point(rg'+ug', rh');
+  [dnorm12, ~] = distance_point_point(rg', rh'+uh');
+  [dnorm22, ~] = distance_point_point(rg'+ug', rh'+uh');
+  [~, I] = min([dnorm11;dnorm21;dnorm12;dnorm22]);
+  switch I
+    case 1, Punkt1 = rg';     Punkt2 = rh';
+    case 2, Punkt1 = rg'+ug'; Punkt2 = rh';
+    case 3, Punkt1 = rg';     Punkt2 = rh'+uh';
+    case 4, Punkt1 = rg'+ug'; Punkt2 = rh'+uh';
+    otherwise, Punkt1 = NaN(3,1); Punkt2 = NaN(3,1); % Nur für Kompilieren. Kann nicht auftreten
   end
-  if mu <= 0
-    Punkt2 = rh';
-  else % mu >= 1
-    Punkt2 = rh'+uh';
-  end
-  [dnorm, d] = distance_point_point(Punkt1, Punkt2);
-  % Punkte des kürzesten Abstandes:
-  pkol = [Punkt1+d'/dnorm*rad1; Punkt2-d'/dnorm*rad2];
-  % Abstand der Linien mit Radien der Zylinder vergleichen
-  d_min = - (Kap1(7) + Kap2(7));
-  dist = dnorm - (Kap1(7) + Kap2(7));
-  if dist < 0
-    kol = 1;
-  else
-    kol = 0;
-  end
+  % Berechne Kollision aus den beiden begrenzenden (Halb-)Kugeln
+  [dist, kol, pkol, d_min] = collision_sphere_sphere([Punkt1,rad1],[Punkt2,rad2]);
   
 % Ein Punkt des kürzesten Abstandes liegt auf Zylindermantel, der
 % andere auf Anfangs- oder Endhalbkugel des anderen Zylinders
