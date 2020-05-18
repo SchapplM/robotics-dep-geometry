@@ -197,7 +197,7 @@ for i = 1:17
       case 17
         tt = 'Komplett identisch und selber Ort';
         p2A = p1A;
-        p2B = p2A;
+        p2B = p1B;
         r2 = r1;
         kol_groundtruth = true;
     end
@@ -219,15 +219,11 @@ for i = 1:17
       figure(i); clf; hold on;
       plot3(p1A(1), p1A(2), p1A(3), 'kv', 'MarkerSize', 10);
       plot3(p1B(1), p1B(2), p1B(3), 'k^', 'MarkerSize', 10);
-      drawSphere([p1A; r1]','FaceColor', 'b', 'FaceAlpha', 0.3);
-      drawCylinder([p1A;p1B;r1]','FaceColor', 'b', 'FaceAlpha', 0.3);
-      drawSphere([p1B; r1]','FaceColor', 'b', 'FaceAlpha', 0.3);
+      drawCapsule([p1A;p1B;r1]','FaceColor', 'b', 'FaceAlpha', 0.3, 'EdgeColor', 'k', 'LineStyle', ':');
 
       plot3(p2A(1), p2A(2), p2A(3), 'ks', 'MarkerSize', 10);
       plot3(p2B(1), p2B(2), p2B(3), 'ko', 'MarkerSize', 10);
-      drawSphere([p2A; r2]','FaceColor', 'r', 'FaceAlpha', 0.3);
-      drawCylinder([p2A;p2B;r2]','FaceColor', 'r', 'FaceAlpha', 0.3);
-      drawSphere([p2B; r2]','FaceColor', 'r', 'FaceAlpha', 0.3);
+      drawCapsule([p2A;p2B;r2]','FaceColor', 'r', 'FaceAlpha', 0.3, 'EdgeColor', 'k', 'LineStyle', '--');
 
       plot3(pkol(:,1), pkol(:,2), pkol(:,3), '-kx', 'MarkerSize', 5, 'LineWidth', 3);
       plot3(pkol2(:,1), pkol2(:,2), pkol2(:,3), '-go', 'MarkerSize', 5, 'LineWidth', 3);

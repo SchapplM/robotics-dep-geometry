@@ -108,9 +108,7 @@ for i = 1:13
       figure(i); clf; hold on;
       plot3(p1A(1), p1A(2), p1A(3), 'kv', 'MarkerSize', 10);
       plot3(p1B(1), p1B(2), p1B(3), 'k^', 'MarkerSize', 10);
-      drawSphere([p1A; r1]','FaceColor', 'b', 'FaceAlpha', 0.3)
-      drawCylinder([p1A;p1B;r1]','FaceColor', 'b', 'FaceAlpha', 0.3)
-      drawSphere([p1B; r1]','FaceColor', 'b', 'FaceAlpha', 0.3)
+      drawCapsule([p1A;p1B;r1]','FaceColor', 'b', 'FaceAlpha', 0.3, 'EdgeColor', 'k', 'LineStyle', '--')
       plot3(p2(1), p2(2), p2(3), 'ks', 'MarkerSize', 10);
       drawSphere([p2; r2]','FaceColor', 'r', 'FaceAlpha', 0.3, 'linestyle', ':');
       plot3(pkol(:,1), pkol(:,2), pkol(:,3), '-gx', 'MarkerSize', 5, 'LineWidth', 3)
