@@ -7,13 +7,14 @@
 % 
 % Ausgabe:
 % dist
-%   Abstand der Kapsel-Hüllen
+%   Abstand der Kapsel-Hüllen am Punkt größter Annäherung
 % kol
 %   true falls Kollision, sonst false
 % pkol [2x3]
 %   2 Punkte des kürzesten Abstandes
 % d_min [1x1]
-%   Minimaler Abstand (negativ) der beiden Körper
+%   Minimal möglicher Abstand (negativ) der beiden Körper (maximal mögliche
+%   Eindringtiefe; dient zur möglichen Normierung der Ausgabe dist)
 
 % Moritz Schappler, moritz.schappler@imes.uni-hannover.de, 2013-07
 % (C) Institut für Mechatronische Systeme, Leibniz Universität Hannover

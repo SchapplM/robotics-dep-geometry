@@ -6,13 +6,14 @@
 % 
 % Ausgabe:
 % dist
-%   Abstand zwischen den Kugeln (Abstand der Außenflächen
+%   Abstand zwischen den Kugeln (Abstand der Außenflächen)
 % kol
 %   true falls Kollision, sonst false
 % pkol [2x3]
-%   2 Punkte auf den Kugelhüllen des kürzesten Abstandes
+%   2 Punkte des kürzesten Abstandes auf den Kugelhüllen
 % d_min [1x1]
-%   Minimaler Abstand (negativ) der beiden Körper
+%   Minimal möglicher Abstand (negativ) der beiden Körper (maximal mögliche
+%   Eindringtiefe; dient zur möglichen Normierung der Ausgabe dist)
 
 % Moritz Schappler, moritz.schappler@imes.uni-hannover.de, 2013-07
 % (C) Institut für Mechatronische Systeme, Leibniz Universität Hannover

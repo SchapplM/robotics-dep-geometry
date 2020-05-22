@@ -9,16 +9,17 @@
 % 
 % Ausgabe:
 % dist [1x1]
-%   Abstand der Hüllen von Kugel und Kapsel
+%   Abstand der Hüllen von Kugel und Kapsel (bei größter Annäherung)
 % kol [1x1 logical]
 %   true falls Kollision, sonst false
 % pkol [2x3]
 %   2 Punkte auf den Hüllflächen mit den kürzesten Abständen
-%   Achtung: Dies entspricht nicht den tatsächlichen
+%   Achtung: Dies entspricht nicht (immer) den tatsächlichen
 %   Durchtrittspunkten der Kapsel durch die Kugel. Reicht
 %   aber zur Kollisionserkennung
 % d_min [1x1]
-%   Minimaler Abstand (negativ) der beiden Körper
+%   Minimal möglicher Abstand (negativ) der beiden Körper (maximal mögliche
+%   Eindringtiefe; dient zur möglichen Normierung der Ausgabe dist)
 
 % Moritz Schappler, moritz.schappler@imes.uni-hannover.de, 2013-07
 % (C) Institut für Mechatronische Systeme, Leibniz Universität Hannover
