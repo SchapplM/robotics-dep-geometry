@@ -34,9 +34,15 @@ assert(isa(Kap,'double') && isreal(Kap) && all(size(Kap) == [1 7]) && ...
 %% Algorithmus
 rg = Kap(1:3)'; % Anfangspunkt der Geraden
 ug = Kap(4:6)'-Kap(1:3)';% Richtungsvektoren der Geraden
+% Prüfe, ob Kapsel zu einer Kugel degeneriert ist
+if all(ug==0)
+  % Kapsel hat Länge Null. Ist damit nur eine Kugel
+  [dist, kol, pkol, d_min] = collision_sphere_sphere(Kug, Kap([1:3 7]));
+  return
+end
 rk = Kug(4);
 rz = Kap(7); % Radien von Kugel und Zylinder
-Gerade = [rg', ug']; Punkt = Kug(1:3);  
+Gerade = [rg', ug']; Punkt = Kug(1:3);
 % Prüfe kürzeste Entfernung zur Ersatz-Geraden
 [dnorm, d, lambda, pg] = distance_line_point(Gerade, Punkt);
 pkol = zeros(2, 3);
@@ -87,7 +93,7 @@ else
     if ug(1)~=ug(3) % so senkrecht mit folgender Operation
       v = cross(ug, flipud(ug))';
     else
-      v = ug([1 3 2]); % beliebiger anderer Vektor, da erster nicht geht
+      v = ug([1 3 2])'; % beliebiger anderer Vektor, da erster nicht geht
     end
     vnorm = norm(v);
   end

@@ -19,7 +19,7 @@ matlabfcn2mex({ ...
   });
 
 %% Teste Kollision aus Kugel und Kapsel
-for i = 1:13
+for i = 1:14
   for j = 1:2
     %% Parameter einstellen
     p1A = [0.0;0.0;0.0];
@@ -93,6 +93,12 @@ for i = 1:13
         p1B = [0.2;0.1;-0.4];
         r2  = 0.04;
         kol_groundtruth = true;
+      case 14
+        tt = 'Kapsel ist zur Kugel degeneriert';
+        p2 = [0.2;0.1;-0.4];
+        p1B = p1A;
+        r2  = 0.04;
+        kol_groundtruth = false;
     end
     % Vertausche die Reihenfolge der Punkte, um mehr Code in Test abzudecken.
     % Darf keinen Einfluss auf Ergebnis haben

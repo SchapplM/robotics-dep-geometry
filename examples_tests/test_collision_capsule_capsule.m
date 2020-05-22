@@ -90,7 +90,7 @@ B = [0.8 0.9 0.6;...
      0.5 -0.4 0.5;...
      0.2 0.4 0.1];
 
-for i = 1:17
+for i = 1:18
   for j = 1:4
 
     p1A = [0.0;0.0;0.0];
@@ -200,6 +200,12 @@ for i = 1:17
         p2B = p1B;
         r2 = r1;
         kol_groundtruth = true;
+      case 18
+        tt = 'Eine Kapsel ist zur Kugel degeneriert';
+        p2A = [0.1;0.1;0.7];
+        p2B = p2A;
+        r2 = 0.1;
+        kol_groundtruth = false;
     end
     % Definieren der Eingabevariable für die Funktion. Zusätzlich
     % Vertausche die Reihenfolge der Punkte, um mehr Code in Test

@@ -29,6 +29,15 @@ assert(isa(Kap1,'double') && isreal(Kap1) && all(size(Kap1) == [1 7]) && ...
 % Umwandlung in Geraden in Parameterform
 rg = Kap1(1:3)'; rh = Kap2(1:3)'; % Anfangspunkte der Geraden
 ug = Kap1(4:6)'-Kap1(1:3)'; uh = Kap2(4:6)'-Kap2(1:3)'; % Richtungsvektoren der Geraden
+% Prüfe, ob eine der Kapseln zu einer Kugel degeneriert ist
+if all(ug==0)
+  % erste Kapsel hat Länge Null. Ist damit nur eine Kugel
+  [dist, kol, pkol, d_min] = collision_capsule_sphere(Kap2, Kap1([1:3 7]));
+  return
+elseif all(uh==0) % zweite Kapsel ist degeneriert
+  [dist, kol, pkol, d_min] = collision_capsule_sphere(Kap1, Kap2([1:3 7]));
+  return
+end
 rad1 = Kap1(7); rad2 = Kap2(7); % Radien der Zylinder
 [dnorm, d, lambda, mu, pg, ph] = distance_line_line([rg', ug'], [rh', uh']);
 
