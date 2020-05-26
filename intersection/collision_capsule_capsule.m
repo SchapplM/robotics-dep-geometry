@@ -2,7 +2,7 @@
 % Eine Kapsel ist ein Zylinder mit Halbkugeln als Enden
 % 
 % Eingabe:
-% Kap11, Kap2 [1x7]
+% Kap1, Kap2 [1x7]
 %   Kapsel-Darstellung (Pkt 1, Pkt 2, Radius)
 % 
 % Ausgabe:

@@ -14,7 +14,7 @@
 % dnorm [1x1]
 %   Betrag des kleinsten Abstandes
 % d [3x1]
-%   Vektor des kleinsten Abstandes von Gerade1 zu 2
+%   Vektor des kleinsten Abstandes von Gerade zu Punkt
 % lambda [1x1]
 %   Parameter zum Punkt des kürzesten Abstandes auf der Geraden:
 %   Punkt = OV + lambda*RV

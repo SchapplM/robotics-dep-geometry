@@ -20,13 +20,13 @@
 % (c) Institut für Regelungstechnik, Universität Hannover
 
 function pts = find_intersection_line_box(p, u, q, u1, u2, u3)
-  % Idee: homogene transformation der geraden und der Box in ein
-  % Koordinatensystem, wo die box ein Einheitswürfel mit einer ecke im
+  % Idee: homogene transformation der Geraden und der Box in ein
+  % Koordinatensystem, wo die Box ein Einheitswürfel mit einer Ecke im
   % Ursprung und einer bei [1 1 1] ist. Die inverse Rotationsmatrix
   % wird aus u1 u2 und u3 gebildet: R_inv = [u1 u2 u3] => diag(1/ui^2)*R_inv^T
   % damit müssen nur die Schnittpunkte der transformierten geraden mit den
   % ebenen x/y/z=0/1 berechnet werden und die erhaltenen Parameter nach
-  % Größe geordnet werden. Liegen Schnittpunkte vor, gehüren die beiden
+  % Größe geordnet werden. Liegen Schnittpunkte vor, gehören die beiden
   % mittleren Parameter in der Liste zu diesen. Anderenfalls muss der zur
   % gerade nächste Punkt auf dem Würfel berechnet werden. Nach der
   % Berechnung muss noch die Rücktransformation durchgeführt werden.
@@ -100,7 +100,7 @@ function pts = find_intersection_line_box(p, u, q, u1, u2, u3)
 end
   
 
-% Hilfsfunktion, um zu Überprüfen, ob eine Ecke den akteullen
+% Hilfsfunktion, um zu überprüfen, ob eine Ecke den aktuellen
 % Minmalabstand unterbietet
 function [d_min, p_c] = check_corner(c,p,u,p_c,d_min)
   d = norm(cross(p-c,u))/norm(u);
@@ -110,7 +110,7 @@ function [d_min, p_c] = check_corner(c,p,u,p_c,d_min)
   end
 end
 
-% Hilfsfunktion, um zu Überprüfen, ob eine Kante den aktuellen
+% Hilfsfunktion, um zu überprüfen, ob eine Kante den aktuellen
 % Minmalabstand unterbietet
 function [d_min, p_c] = check_edge(e, ui, cuiu, cucuiu,p,p_c,d_min)
   d = norm((p-e).'*cuiu)/norm(cuiu);
@@ -125,8 +125,8 @@ function [d_min, p_c] = check_edge(e, ui, cuiu, cucuiu,p,p_c,d_min)
   end
 end
 
-% Hilfsfunktion zur Korrektur von Zylinderschnittpunkten die nurt numerisch
-% ausserhalb des Zylinders liegen (d<1e-10)
+% Hilfsfunktion zur Korrektur von Zylinderschnittpunkten die nur numerisch
+% außerhalb des Zylinders liegen (d<1e-10)
 function pts_out = correct_pts(pts_in)
   if isnan(pts_in(3,2)) && pts_in(1,2)<1e-10
     pts_out = [pts_in(1:3,1) pts_in(1:3,1)];
