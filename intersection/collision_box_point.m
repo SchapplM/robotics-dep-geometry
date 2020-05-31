@@ -144,20 +144,3 @@ for i = 1:6
         [pe_faces_all(i,2);pe_faces_all(i,2)+d_faces_all(i,2)], ...
         [pe_faces_all(i,3);pe_faces_all(i,3)+d_faces_all(i,3)], 'g--', 'LineWidth', 2);
 end
-% % Punkt in KS mit Achsen des Quaders rotieren
-% e1 = u1/norm(u1);
-% e2 = u2/norm(u2);
-% e3 = cross(e1,e2);
-% R = [e1,e2,e3];
-% pb = R*p(:);
-% boxpts = R*[q, q+u1, q+u2, q+u3];
-% d = max(min(boxpts,[],2)-pb, pb-max(boxpts,[],2));
-% dist = norm(d);
-% pkol = 
-%   var dx = Math.max(rect.min.x - p.x, 0, p.x - rect.max.x);
-%   var dy = Math.max(rect.min.y - p.y, 0, p.y - rect.max.y);
-%   return Math.sqrt(dx*dx + dy*dy);
-
-
-% Gehe alle Kanten durch und prüfe, welche Kante den niedrigsten Abstand
-% hat
