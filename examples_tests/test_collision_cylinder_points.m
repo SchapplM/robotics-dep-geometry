@@ -82,9 +82,11 @@ for j = 1:2 % Schleife über Vertauschung der Enden
       if k == 1 % keine Transformation
         T_W_0 = eye(4);
       elseif k == 2 % Zufällige Transformation
-        T_W_0 = [eulxyz2r(-0.5+rand(3,1)), rand(3,1); [0 0 0 1]];
-      else % so, dass ein Sonderfall eintritt
-        T_W_0 = [rotx(-pi/2), rand(3,1); [0 0 0 1]];
+        phi = 180*2*(-0.5+rand(3,1)); % [-180,180]
+        T_W_0 = eulerAnglesToRotation3d(phi(1),phi(2),phi(3))* ...
+                createTranslation3d(rand(3,1));
+      else % Drehung so, dass ein Sonderfall eintritt
+        T_W_0 = createRotationOx(-pi/2)*createTranslation3d(rand(3,1));
       end
       pt_W = T_W_0*[pt_0(:);1];
       pt = pt_W(1:3)';
@@ -94,7 +96,7 @@ for j = 1:2 % Schleife über Vertauschung der Enden
       [dist, kol, pkol, dmin] = collision_cylinder_point(cyl_W, pt);
 
       %% Zeichnen
-      figure(i);clf; hold on;
+      change_current_figure(i);clf; hold on;
       drawCylinder(cyl_W, 'EdgeColor', 'k', 'FaceColor', 'b', 'FaceAlpha', 0.3);
       plot3(pt(1), pt(2), pt(3), '-kx', 'MarkerSize', 10, 'LineWidth', 3);
       plot3([pkol(1);pt(1)], [pkol(2);pt(2)], [pkol(3);pt(3)], '-g', 'MarkerSize', 5, 'LineWidth', 3);
@@ -103,6 +105,7 @@ for j = 1:2 % Schleife über Vertauschung der Enden
       xlabel('x in m'); ylabel('y in m'); zlabel('z in m');
       view(3); grid on; axis equal;
       title(sprintf('Fall %d: %s. Dist=%1.0fmm', i, tt, 1e3*dist));
+      drawnow();
       %% Prüfung
       % Rechnerische Prüfung der Ergebnisse
       assert(all(size(pkol)==[1 3]), 'pkol muss 1x3 sein');
@@ -135,3 +138,4 @@ for j = 1:2 % Schleife über Vertauschung der Enden
     end
   end
 end
+fprintf('Testfälle für Kollision Zylinder und Punkt erfolgreich absolviert.\n');

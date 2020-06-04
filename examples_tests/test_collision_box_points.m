@@ -53,7 +53,9 @@ for i = 1:6
     if k == 1
       T_W_0 = eye(4);
     else
-      T_W_0 = [eulxyz2r(-0.5+rand(3,1)), rand(3,1); [0 0 0 1]];
+      phi = 180*2*(-0.5+rand(3,1)); % [-180,180]
+      T_W_0 = eulerAnglesToRotation3d(phi(1),phi(2),phi(3))* ...
+              createTranslation3d(rand(3,1));
     end
     pt_W = T_W_0*[pt_0(:);1];
     pt = pt_W(1:3)';
@@ -67,10 +69,10 @@ for i = 1:6
 
     %% Zeichnen
     q = box(1:3)'; u1 = box(4:6)'; u2 = box(7:9)'; u3 = box(10:12)';
-    figure(i);clf; hold on;
+    change_current_figure(i);clf; hold on;
     cubpar_c = q(:)+(u1(:)+u2(:)+u3(:))/2; % Mittelpunkt des Quaders
     cubpar_l = [norm(u1); norm(u2); norm(u3)]; % Dimension des Quaders
-    cubpar_a = 180/pi*r2eulzyx([u1(:)/norm(u1), u2(:)/norm(u2), u3(:)/norm(u3)]); % Orientierung des Quaders
+    cubpar_a = rotation3dToEulerAngles([u1(:)/norm(u1), u2(:)/norm(u2), u3(:)/norm(u3)])';
     drawCuboid([cubpar_c', cubpar_l', cubpar_a'], 'FaceColor', 'b', 'FaceAlpha', 0.3);
     plot3(pt(1), pt(2), pt(3), '-kx', 'MarkerSize', 10, 'LineWidth', 3);
     plot3([pkol(1);pt(1)], [pkol(2);pt(2)], [pkol(3);pt(3)], '-g', 'MarkerSize', 5, 'LineWidth', 3);
@@ -78,6 +80,7 @@ for i = 1:6
     xlabel('x in m'); ylabel('y in m'); zlabel('z in m');
     view(3); grid on; axis equal;
     title(sprintf('Fall %d: %s. Dist=%1.0fmm', i, tt, 1e3*dist));
+    drawnow();
     %% Prüfung
     % Rechnerische Prüfung der Ergebnisse
     assert(all(~isnan([dist(:); pkol(:)])), 'Ausgabe sollte nicht NaN sein');
@@ -103,3 +106,4 @@ for i = 1:6
       'Ausgabevariable pkol stimmt nicht mit mex-Funktion überein');
   end
 end
+fprintf('Testfälle für Kollision Quader und Punkt erfolgreich absolviert.\n');
