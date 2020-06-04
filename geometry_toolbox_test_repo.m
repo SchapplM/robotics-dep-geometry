@@ -20,6 +20,8 @@ test_intersection_functions; close all
 test_collision_capsule_capsule; close all
 test_collision_capsule_sphere; close all
 test_collision_sphere_sphere; close all
+test_collision_box_points; close all
+test_collision_cylinder_points; close all
 
 test_angle_range
 
