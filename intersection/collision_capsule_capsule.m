@@ -56,9 +56,9 @@ if all([mu, lambda]>=0 & [mu, lambda]<=1)
     % Ergebnis. TODO: Die Wahl ist vielleicht noch nicht sinnvoll, da nicht
     % die Längste Verbindung gewählt wird.
     if ug(1)~=ug(3) % so senkrecht mit folgender Operation
-      v = cross(ug, flipud(ug))';
+      v = cross(ug, ug([3 2 1]))';
     else
-      v = ug([1 3 2]); % beliebiger anderer Vektor, da erster nicht geht
+      v = ug([1 3 2])'; % beliebiger anderer Vektor, da erster nicht geht
     end
     vnorm = norm(v);
   end

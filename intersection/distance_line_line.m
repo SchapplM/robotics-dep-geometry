@@ -45,7 +45,7 @@ ug = Gerade1(4:6)'; uh = Gerade2(4:6)'; % Richtungsvektoren der Geraden
 % Lösung des Gleichungssysteme mit Invertierung der 2x2-Matrix [a b; c d]
 a = ug'*uh; b = -uh'*uh; c = ug'*ug; d = -uh'*ug;
 den = (a*d-b*c); % Determinante
-if den == 0
+if abs(den) < 1e-12
   % Geraden sind parallel
   pg = rg; % Alle Punkte haben den gleichen Abstand. Nehme den ersten Aufpunkt
   lambda = 0; % Eigenschaft des Aufpunkts
