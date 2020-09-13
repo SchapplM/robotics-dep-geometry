@@ -39,6 +39,14 @@ for i = 1:size(theta, 2)
   % Bestimme den maximalen Abstand zwischen zwei Winkeln. Dieser Abstand
   % entspricht der Spannweite aller Winkel
   [theta_range_cand,I_maxrange] = max(abs(theta_i_diff));
+  % Behandlung für Sonderfall, dass nur zwei Winkel eingegeben sind. Dann
+  % wird die Differenz doppelt angegeben und ohne folgende Ausnahme immer
+  % der negative Fall angenommen (mit entsprechend falscher Ausgabe).
+  Imax = abs(theta_i_diff)==abs(theta_range_cand); % Prüfe ob Maximalwert mehrfach vorkommt
+  if sum(Imax) > 1 % Annahme: Wenn mehrfach vorkommend, gibt es immer einen positiv und einen negativ
+    Ipos = theta_i_diff > 0; % Indizes für positive Werte
+    I_maxrange = find(Ipos&Imax, 1, 'first'); % Nehme positiven Maximalwert
+  end
   if theta_i_diff(I_maxrange) < 0
     % Nächsthöherer Wert liegt zur linken. 
     % Die Lücke ist also bestimmt durch den aktuell betrachteten Abstand.

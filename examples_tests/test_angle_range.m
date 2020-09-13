@@ -14,6 +14,7 @@
 clear
 clc
 close all
+plot_figures = false;
 %% Manuell berechnete Minimalbeispiele
 % Sätze von Winkeln, für die per Augenmaß die Spannweite ermittelt wurde
 theta = cell(5,1); % Winkel-Kombinationen
@@ -28,8 +29,14 @@ theta{4} = pi/180*[-20, 160, 130, -50, -70];
 delta(4) = pi/180*210; % 130 bis 20 sind raus -> 180+(180-150)=210 sind drin.
 theta{5} = pi/180*[17  -167  -110   -94    17];
 delta(5) = pi/180*184; % 167+17 = 184 sind drin
+theta{6} = pi/180*[60 60 60];
+delta(6) = pi/180*0; % drei mal der gleiche Wert. Muss Null sein!
+theta{7} = pi/180*[60 80];
+delta(7) = pi/180*20; % zwei Werte. Führte vorher zu Fehler in angle_range.m
+theta{8} = pi/180*[-60 -60 50];
+delta(8) = pi/180*110; % Effektiv nur zwei Werte. War vorher Fehlerfall.
 
-for i = []%1:5
+for i = 1:8
   fprintf('Konfiguration %d. Winkel: [%s]\n', i, disp_array(180/pi*theta{i}, '%1.0f'));
   delta_i_test = NaN(1,3);
   
@@ -83,16 +90,18 @@ for i = []%1:5
   fprintf('Konfiguration %d; Korrekte Ansätze: [%s]\n', ...
     i, disp_array(find(I_res), '%d'));
   
-  figure(i);clf;hold all
-  drawCircle(0,0,1);
-  for j = 1:length(theta{i})
-    plot([0;cos(theta{i}(j))], [0; sin(theta{i}(j))], '-');
-    text(cos(theta{i}(j)), sin(theta{i}(j)), sprintf('%1.0f / %1.0f', ...
-      180/pi*theta{i}(j), 180/pi*normalizeAngle(theta{i}(j))));
+  if plot_figures
+    figure(i);clf;hold all
+    drawCircle(0,0,1);
+    for j = 1:length(theta{i})
+      plot([0;cos(theta{i}(j))], [0; sin(theta{i}(j))], '-');
+      text(cos(theta{i}(j)), sin(theta{i}(j)), sprintf('%1.0f / %1.0f', ...
+        180/pi*theta{i}(j), 180/pi*normalizeAngle(theta{i}(j))));
+    end
+    grid on;
+    title(sprintf('Spannweite: %1.0f; Erg.: [%s]. Korrekt: [%s]', ...
+      180/pi*delta(i), disp_array(180/pi*delta_i_test, '%1.0f'), disp_array(find(I_res), '%d')));
   end
-  grid on;
-  title(sprintf('Spannweite: %1.0f; Erg.: [%s]. Korrekt: [%s]', ...
-    180/pi*delta(i), disp_array(180/pi*delta_i_test, '%1.0f'), disp_array(find(I_res), '%d')));
   
   if ~I_res(1)
     error('Der Ansatz aus angle_range.m funktioniert nicht. Sollte er aber!');
