@@ -21,6 +21,8 @@
 % (C) Institut für Regelungstechnik, Leibniz Universität Hannover
 
 function pts = find_intersection_line_capsule(p, u, p1, p2, r)
+%#codegen
+%$cgargs {zeros(3,1),zeros(3,1),zeros(3,1),zeros(3,1),0}
   % Berechne Lotfußpunkt q der windschiefen geraden g1: x=p+s*u; s aus R und
   % g2: x=p1+t*v; v=p2-p1, t aus R auf der geraden g1. Dazu wird die
   % Hilfsebene E: x=p1+s*v+t*(u x v) konstruiert, die g2 enthält und als
@@ -66,13 +68,13 @@ function pts = find_intersection_line_capsule(p, u, p1, p2, r)
   % Hilfsfunktion zur Korrektheitsprüfung und Korrektur der
   % Zylinderschnittpunkte an der Seite p1
   function p_out = correct_intersection_k1
-    sqrt_s = sqrt(((p-p1).'*u)^2/(u.'*u)^2-((p-p1).'*(p-p1)-r^2)/(u.'*u));
-    if imag(sqrt_s)~=0 % falls keine Schnittpunkte vorliegen: nächster pkt
+    s = ((p-p1).'*u)^2/(u.'*u)^2-((p-p1).'*(p-p1)-r^2)/(u.'*u);
+    if s < 0 % falls keine Schnittpunkte vorliegen: nächster pkt
       p_out = find_next_pkt;
       pts = [p_out [norm(cross(p_out-p,u))/norm(u); NaN(2,1)]];
-      finished=1;
       return;
     end
+    sqrt_s = sqrt(s);
     s_s = -(p-p1).'*u/(u.'*u);
     s1 = s_s+sqrt_s;
     s2 = s_s-sqrt_s;
@@ -81,25 +83,26 @@ function pts = find_intersection_line_capsule(p, u, p1, p2, r)
     if (pc11-p1).'*v<0 % pc11 auf richtiger Hälfte
       if (pc12-p1).'*v<0 % pc12 auf richtiger Hälfte
         pts=[pc11 pc12];
-        finished=1;
-        p_out=0;
+        p_out=zeros(3,1);
         return;
       end
       p_out=pc11;
     elseif (pc12-p1).'*v<0 % pc12 auf richtiger Hälfte
       p_out=pc12;
+    else
+      p_out = NaN(3,1); % Fall nicht vorgesehen
     end
   end
   % Hilfsfunktion zur Korrektheitsprüfung und Korrektur der
   % Zylinderschnittpunkte an der Seite p2
   function p_out = correct_intersection_k2
-    sqrt_s = sqrt(((p-p2).'*u)^2/(u.'*u)^2-((p-p2).'*(p-p2)-r^2)/(u.'*u));
-    if imag(sqrt_s)~=0 % falls keine Schnittpunkte vorliegen: nächster pkt
+    s = ((p-p2).'*u)^2/(u.'*u)^2-((p-p2).'*(p-p2)-r^2)/(u.'*u);
+    if s < 0 % falls keine Schnittpunkte vorliegen: nächster pkt
       p_out = find_next_pkt;
       pts = [p_out [norm(cross(p_out-p,u))/norm(u); NaN(2,1)]];
-      finished=1;
       return;
     end
+    sqrt_s = sqrt(s);
     s_s = -(p-p2).'*u/(u.'*u);
     s1 = s_s+sqrt_s;
     s2 = s_s-sqrt_s;
@@ -108,18 +111,19 @@ function pts = find_intersection_line_capsule(p, u, p1, p2, r)
     if (pc11-p2).'*v>0 % pc11 auf richtiger Hälfte
       if (pc12-p2).'*v>0 % pc12 auf richtiger Hälfte
         pts=[pc11 pc12];
-        finished=1;
-        p_out=0;
+        p_out=zeros(3,1);
         return;
       end
       p_out=pc11;
     elseif (pc12-p2).'*v>0 % pc12 auf richtiger Hälfte
       p_out=pc12;
+    else
+      p_out = NaN(3,1); % Fall nicht vorgesehen
     end
   end
 
   cpp1v  = cross(p-p1,v);
-  sqrt_z = sqrt((cuv.'*cpp1v)^2/(cuv.'*cuv)^2-(cpp1v.'*cpp1v-r^2*(v.'*v))/(cuv.'*cuv));
+  z = (cuv.'*cpp1v)^2/(cuv.'*cuv)^2-(cpp1v.'*cpp1v-r^2*(v.'*v))/(cuv.'*cuv);
   % Wenn keine Schnittpunkte vorliegen, muss der Punkt auf der Kapsel
   % berechnet werden, der der Geraden g1 am nächsten liegt. Dazu werden
   % wieder die drei Fälle "q jenseits von p1", "q jenseits von p2" und "q
@@ -147,26 +151,20 @@ function pts = find_intersection_line_capsule(p, u, p1, p2, r)
     end
     p_out=p_c;
   end
-  if (imag(sqrt_z)~=0) % kein Schnittpunkt liegt vor, wähle nächsten Punkt
+  if z < 0 % kein Schnittpunkt liegt vor, wähle nächsten Punkt
     pc1 = find_next_pkt;
     pts = [pc1, [norm(cross(pc1-p,u))/norm(u); NaN(2,1)]];
   else % Schnittpunkte gefunden, auf Korrektheit prüfen und ggf. korrigieren
+    sqrt_z = sqrt(z);
     s_z = -cuv.'*cpp1v/(cuv.'*cuv);
     s1  = s_z+sqrt_z;
     s2  = s_z-sqrt_z;
     pc1 = p+s1*u;
     pc2 = p+s2*u;
-    finished=0;
     if (pc1-p1).'*v<0 % Schnittpunkt mit Halbkugel um p1 liegt vor
       pc1 = correct_intersection_k1;
-      if finished
-        return;
-      end
     elseif (pc1-p2).'*v>0 % Schnittpunkt mit Halbkugel um p2 liegt vor
       pc1 = correct_intersection_k2;
-      if finished
-        return;
-      end
     end
     if (pc2-p1).'*v<0 % Schnittpunkt mit Halbkugel um p1 liegt vor
       pc2 = correct_intersection_k1;

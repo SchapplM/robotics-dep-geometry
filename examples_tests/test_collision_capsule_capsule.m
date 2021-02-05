@@ -25,6 +25,13 @@ rg_ges = -0.5+rand(100,3);
 ug_ges = -0.5+rand(100,3);
 rh_ges = -0.5+rand(100,3);
 uh_ges = -0.5+rand(100,3);
+
+% Manueller Testfall aus anderem Test
+rg_ges(91,:) = [ 2.7143    1.7126   -1.8909];
+ug_ges(91,:) = [-2.5418   -1.9244    2.1214];
+rh_ges(91,:) = [ 5.1110    2.5439   -4.3019];
+uh_ges(91,:) = [-7.0389   -4.2619    5.6825];
+
 % Sonderfälle einbauen
 ug_ges(92,:) = 0; % Richtungsvektor Null
 uh_ges(93,:) = 0;
@@ -90,7 +97,7 @@ B = [0.8 0.9 0.6;...
      0.5 -0.4 0.5;...
      0.2 0.4 0.1];
 
-for i = 1:18 % Schleife über manuelle Testszenarien
+for i = 1:19 % Schleife über manuelle Testszenarien
   for j = 1:4 % Schleife über Vertauschung der Enden
     p1A = [0.0;0.0;0.0];
     p1B = [0.0;0.0;0.4];
@@ -205,6 +212,15 @@ for i = 1:18 % Schleife über manuelle Testszenarien
         p2B = p2A;
         r2 = 0.1;
         kol_groundtruth = false;
+      case 19
+        tt = 'fast parallel';
+        p1A = [-0.7797   -0.7738   -0.4632]';
+        p1B = [1.7621    1.3476    1.4612]';
+        r1 = 0.1;
+        p2A = [-2.8801   -1.9239   -1.9694]';
+        p2B = [4.1588    3.7586    2.2925]';
+        r2 = 0;
+        kol_groundtruth = false; % TODO: Punkt des geringesten Abstands auch vorgeben.
     end
     % Definieren der Eingabevariable für die Funktion. Zusätzlich
     % Vertausche die Reihenfolge der Punkte, um mehr Code in Test
@@ -291,6 +307,20 @@ for i = 1:18 % Schleife über manuelle Testszenarien
       end
       assert(abs(norm(d_min(:) - d_min2(:))) < 1e-12, ...
         'Ausgabevariable d_min stimmt nicht mit mex-Funktion überein');
+      
+      % Vertausche die Argumente beim Aufruf
+      [dist3, kol3, pkol3, d_min3] = collision_capsule_capsule(Kap2_W, Kap1_W);
+      assert(abs(norm(dist(:) - dist3(:))) < 1e-12, ...
+        'Ausgabevariable dist stimmt nicht bei Vertauschung der Eingangsreihenfolge');
+      assert(abs(norm(kol(:) - kol3(:))) < 1e-12, ...
+        'Ausgabevariable kol stimmt nicht bei Vertauschung der Eingangsreihenfolge');
+      if dnorm > 1e-12
+        pkol3_flip = flipud(pkol3);
+        assert(abs(norm(pkol(:) - pkol3_flip(:))) < 1e-12, ...
+          'Ausgabevariable pkol stimmt nicht bei Vertauschung der Eingangsreihenfolge');
+      end
+      assert(abs(norm(d_min(:) - d_min3(:))) < 1e-12, ...
+        'Ausgabevariable d_min stimmt nicht bei Vertauschung der Eingangsreihenfolge');
     end
   end
 end

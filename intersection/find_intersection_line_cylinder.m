@@ -110,7 +110,7 @@ function pts = find_intersection_line_cylinder(p, u, p1, p2, r)
     % kein Schnittpunkt liegt vor, wähle nächsten Punkt
     pc1 = find_next_pkt(q,p1,p2,p,v,u,r);
     pts = [pc1, [norm(cross(pc1-p,u))/norm(u); NaN(2,1)]];
-    pts = correct_pts(pts);
+    pts = correct_pts(pts); % TODO: Hier manchmal falsche Korrekturen
     return;
   else % Schnittpunkte gefunden, auf Korrektheit prüfen und ggf. korrigieren
     sqrt_z = sqrt(radikant);
@@ -188,10 +188,29 @@ end
 
 % Hilfsfunktion zum Finden des nächstgelegenen Punktes auf der
 % Zylinderoberfläche
+% Input:
+% q [3x1]
+%   Lotfußpunkt auf der Geraden
+% p1 [3x1]
+%   center point of the first end of the cylinder
+% p2 [3x1]
+%   center point of the second end of the cylinder
+% p [3x1]
+%   line base vector
+% v [3x1]
+%   direction vector of the cylinder axis
+% u [3x1]
+%   line direction vector
+% r scalar
+%   radius of the cylinder
+% 
+% Output:
+% p_out
+%   Nächster Punkt auf dem Zylinder
 function p_out = find_next_pkt(q,p1,p2,p,v,u,r)
   if (q-p1).'*v<0
-    if (abs(u.'*v/(norm(u)*norm(v)))<1e-10) % gerade g parallel zu zylinderoberfläche
-      p_c = p+(p1-p).'*u/(u.'*u)*u;
+    if abs(u.'*v/(norm(u)*norm(v)))<1e-10 % gerade g parallel zu zylinderoberfläche
+      p_c = p+(p1-p).'*u/(u.'*u)*u; % TODO: Hier Fehler in manchen Grenzfällen.
     else
       p_in = p+(p1-p).'*v/(u.'*v)*u;
       p_c = golden_section_search(q, p_in, p1, v, r);
@@ -200,8 +219,8 @@ function p_out = find_next_pkt(q,p1,p2,p,v,u,r)
       p_c = p1+(p_c_pp1)/norm(p_c_pp1)*r;
     end
   elseif (q-p2).'*v>0
-    if (abs(u.'*v/(norm(u)*norm(v)))<1e-10) % gerade g parallel zu zylinderoberfläche
-      p_c = p+(p2-p).'*u/(u.'*u)*u;
+    if abs(u.'*v/(norm(u)*norm(v)))<1e-10 % gerade g parallel zu zylinderoberfläche
+      p_c = p+(p2-p).'*u/(u.'*u)*u; % TODO: Fehler in Grenzfällen.
     else
       p_in = p+(p2-p).'*v/(u.'*v)*u;
       p_c = golden_section_search(q, p_in, p2, v, r);
