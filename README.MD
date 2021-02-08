@@ -11,7 +11,10 @@ Für die Benutzung des Repos muss die Pfadinitialisierung durchgeführt werden m
 
 ### Abhängigkeiten
 
-Einige Modultests benötigen das Repo `matlab-ext` mit externen Funktionen und Toolboxen.
+Einige Modultests benötigen folgende Abhängigkeiten (mit initialisiertem Pfad)
+
+* [matlab-ext](https://github.com/SchapplM/robotics-dep-ext) mit externen Funktionen und Toolboxen
+* [matlab-tools](https://github.com/SchapplM/matlab_toolbox) mit allgemeinen Matlab-Funktionen
 
 ### Modultests
 
