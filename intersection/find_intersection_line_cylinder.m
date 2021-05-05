@@ -89,7 +89,7 @@ function pts = find_intersection_line_cylinder(p, u, p1, p2, r)
   % Richtung (q-q3), um den gesuchten Punkt zu finden.
   
   if norm(cuv)/(norm(u)*norm(v))<1e-10 % u parralel zu Zylinderachse
-    r1 = p-p1-(p-p1).'*u/(u.'*u);
+    r1 = p-p1-u*(p-p1).'*u/(u.'*u);
     if norm(r1)>=r
       if u.'*v<0 % u entgegen v, auftreffpunkt auf Seite von p2
         pc1 = p2+r1/norm(r1)*r;
