@@ -15,7 +15,9 @@
 % Output:
 % pts [3x2]
 %   intersection points, or nearest point on cylinder and distance to
-%   nearest point stacked with NaNs, when no intersections exist
+%   nearest point as well as line parameter until which the same distance is
+%   kept if line is parallel to zylinder axis or side planes stacked with NaNs,
+%   when no intersections exist
 
 % Jonathan Vorndamme, vorndamme@irt.uni-hannover.de, 2016-06
 % (c) Institut für Regelungstechnik, Universität Hannover
@@ -89,14 +91,16 @@ function pts = find_intersection_line_cylinder(p, u, p1, p2, r)
   % Richtung (q-q3), um den gesuchten Punkt zu finden.
   
   if norm(cuv)/(norm(u)*norm(v))<1e-10 % u parralel zu Zylinderachse
-    r1 = p-p1-u*(p-p1).'*u/(u.'*u);
-    if norm(r1)>=r
+    r1 = p-p1-(p-p1).'*u/(u.'*u)*u;
+    if norm(r1)>r
       if u.'*v<0 % u entgegen v, auftreffpunkt auf Seite von p2
         pc1 = p2+r1/norm(r1)*r;
+        s = -norm(v)/norm(u);
       else % u in richtung v, Auftreffpunkt auf Seite von p1
         pc1 = p1+r1/norm(r1)*r;
+        s = norm(v)/norm(u);
       end
-      pts = [pc1, [norm(cross(pc1-p,u))/norm(u); NaN(2,1)]];
+      pts = [pc1, [norm(cross(pc1-p,u))/norm(u); norm(v)/norm(u); NaN]];
       pts = correct_pts(pts);
       return;
     else % Schnittpunkte auf beiden Zylinderflächen
@@ -120,13 +124,13 @@ function pts = find_intersection_line_cylinder(p, u, p1, p2, r)
     pc1 = p+s1*u;
     pc2 = p+s2*u;
     if abs(u.'*v/(norm(u)*norm(v)))<1e-10 % g parallel zur Zylinderfläche
-      if ((p1-pc1).'*v)*((p2-pc1).'*v)>0 % keine Schnittpunkt, da g jenseits von p1 oder p2 verlaeuft
+      if ((p1-pc1).'*v)*((p2-pc1).'*v)>0 % kein Schnittpunkt, da g jenseits von p1 oder p2 verlaeuft
         if (p1-pc1).'*v<=0 % g jenseis von p2
           pc2 = pc2+(p2-pc2).'*v/(v.'*v)*v;
         else % g jenseits von p1
           pc2 = pc2+(p1-pc2).'*v/(v.'*v)*v;
         end
-        pts = [pc2 [norm(cross(pc2-p,u))/norm(u); NaN(2,1)]];
+        pts = [pc2 [norm(cross(pc2-p,u))/norm(u); 2*sqrt_z; NaN]];
         pts = correct_pts(pts);
         return;
       end
@@ -214,20 +218,20 @@ function p_out = find_next_pkt(q,p1,p2,p,v,u,r)
     else
       p_in = p+(p1-p).'*v/(u.'*v)*u;
       p_c = golden_section_search(q, p_in, p1, v, r);
-      p_c_p = p_c+(p1-p_c).'*v/(v.'*v)*v;
-      p_c_pp1 = p_c_p-p1; 
-      p_c = p1+(p_c_pp1)/norm(p_c_pp1)*r;
     end
+    p_c_p = p_c+(p1-p_c).'*v/(v.'*v)*v;
+    p_c_pp1 = p_c_p-p1; 
+    p_c = p1+(p_c_pp1)/norm(p_c_pp1)*r;
   elseif (q-p2).'*v>0
     if abs(u.'*v/(norm(u)*norm(v)))<1e-10 % gerade g parallel zu zylinderoberfläche
       p_c = p+(p2-p).'*u/(u.'*u)*u; % TODO: Fehler in Grenzfällen.
     else
       p_in = p+(p2-p).'*v/(u.'*v)*u;
       p_c = golden_section_search(q, p_in, p2, v, r);
-      p_c_p = p_c+(p2-p_c).'*v/(v.'*v)*v;
-      p_c_pp2 = p_c_p-p2; 
-      p_c = p2+(p_c_pp2)/norm(p_c_pp2)*r;
     end
+    p_c_p = p_c+(p2-p_c).'*v/(v.'*v)*v;
+    p_c_pp2 = p_c_p-p2; 
+    p_c = p2+(p_c_pp2)/norm(p_c_pp2)*r;
   else
     q3  = p1+(q-p1).'*v/(v.'*v)*v;
     p_c = q3+(q-q3)/norm(q-q3)*r;

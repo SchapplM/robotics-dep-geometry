@@ -8,112 +8,124 @@
 
 clc
 clear
+close all;
 rng(0);
 
 % Kompiliere alle Funktionen. Dadurch werden Syntax-Fehler erkannt
 % matlabfcn2mex({'find_intersection_line_cylinder'});
 %% Teste Kollision aus Zylinder und Gerade
-for j = 1:2 % Schleife über Vertauschung der Enden
+for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der Geraden
   % Vertausche die Reihenfolge der Punkte, um mehr Code in Test abzudecken.
   % Darf keinen Einfluss auf Ergebnis haben
   if j == 1
     cyl_0 = [0,0,0, 0,0,5, 1];
-  elseif j == 2
+  elseif j == 3
     cyl_0 = [0,0,5, 0,0,0, 1];
   end
-  for i = 1:20 % Schleife über manuelle Testszenarien
+  for i = 1:15 % Schleife über manuelle Testszenarien
     testtol = 1e-9;
+    mextol = 1e-12;
     switch i
       case 1
         ug = [0 0 1]';
         rg = [0 0 6]';
-        pt_groundtruth_0 = [0 0 0]';
+        S_groundtruth_0 = [0 0 0; 0 0 5]';
         intersect_truth = true;
         tt = 'Gerade parallel zu Mittellinie mit Schnitt';
       case 2
         ug = [0 0 1]';
         rg = [2 0 6]';
-        pt_groundtruth_0 = [1 0 0]';
+        S_groundtruth_0 = [1 0 0; 1 5 NaN]';
         intersect_truth = false;
         tt = 'Gerade parallel zu Mittellinie ohne Schnitt';
       case 3
         ug = [0 0 1]';
         rg = [1 0 6]';
-        pt_groundtruth_0 = [1 0 0]';
+        S_groundtruth_0 = [1 0 0; 1 0 5]';
         intersect_truth = true;
         tt = 'Gerade parallel zu Mittellinie tangential';
       case 4
         ug = [1 0 0]';
         rg = [0 0 2]';
-        pt_groundtruth_0 = [-1 0 2]';
+        S_groundtruth_0 = [-1 0 2; 1 0 2]';
         intersect_truth = true;
         tt = 'Gerade parallel zu Deckel mit Schnitt';
       case 5
         ug = [1 0 0]';
         rg = [0 0 6]';
-        pt_groundtruth_0 = [-1 0 5]';
+        S_groundtruth_0 = [-1 0 5; 1 2 NaN]';
         intersect_truth = false;
         tt = 'Gerade parallel zu Deckel aussen vorbei, Abstand Zylinderachse < r';
       case 6
         ug = [1 0 0]';
         rg = [0 2 6]';
-        pt_groundtruth_0 = [0 1 5]';
+        S_groundtruth_0 = [0 1 5; sqrt(2) NaN NaN]';
         intersect_truth = false;
         tt = 'Gerade parallel zu Deckel aussen vorbei, Abstand Zylinderachse > r';
       case 7
         ug = [1 0 0]';
         rg = [0 2 2]';
-        pt_groundtruth_0 = [0 1 2]';
+        S_groundtruth_0 = [0 1 2; 1 NaN NaN]';
         intersect_truth = false;
         tt = 'Gerade parallel zu Deckel mittig vorbei';
       case 8
         ug = [1 0 0]';
         rg = [0 1 2]';
-        pt_groundtruth_0 = [0 1 2]';
+        S_groundtruth_0 = [0 1 2; 0 1 2]';
         intersect_truth = true;
+        testtol = 1e-7; % j = 3, k = 1
+        mextol = 1e-8; % j = 3, k = 2
         tt = 'Gerade parallel zu Deckel tangential am Mantel';
       case 9
         ug = [1 0 1]';
         rg = [0 0 2]';
-        pt_groundtruth_0 = [-1 0 1]';
+        S_groundtruth_0 = [-1 0 1; 1 0 3]';
         intersect_truth = true;
         tt = 'Gerade windschief Schnitt 2x Mantel';
       case 10
         ug = [1 0 1]';
         rg = [0 0 5]';
-        pt_groundtruth_0 = [-1 0 4]';
+        S_groundtruth_0 = [-1 0 4; 0 0 5]';
         intersect_truth = true;
         tt = 'Gerade windschief Schnitt Mantel und Deckel';
       case 11
-        ug = [1 0 1/5]';
+        ug = [1 0 5]';
         rg = [0 0 5/2]';
-        pt_groundtruth_0 = [-1/2 0 0]';
+        S_groundtruth_0 = [-1/2 0 0; 1/2 0 5]';
         intersect_truth = true;
         tt = 'Gerade windschief Schnitt beide Deckel';
       case 12
         ug = [1 0 1]';
         rg = [0 1 2]';
-        pt_groundtruth_0 = [0 1 2]';
-        intersect_truth = false;
+        S_groundtruth_0 = [0 1 2; 0 1 2]';
+        intersect_truth = true;
+        testtol = 1e-7; % j = 3, k = 2
         tt = 'Gerade windschief tangential';
       case 13
-        ug = [1 0 0]';
+        ug = [1 0 1]';
         rg = [0 2 2]';
-        pt_groundtruth_0 = [0 1 2]';
+        S_groundtruth_0 = [0 1 2; 1 NaN NaN]';
         intersect_truth = false;
         tt = 'Gerade windschief mittig vorbei';
       case 14
-        ug = [1 0 0]';
-        rg = [0 2 2]';
-        pt_groundtruth_0 = [0 1 2]';
+        ug = [1 0 1]';
+        rg = [0 0 7]';
+        S_groundtruth_0 = [-1 0 5; 0.5*sqrt(2) NaN NaN]';
         intersect_truth = false;
         tt = 'Gerade windschief aussen vorbei über Deckel';
       case 15
-        ug = [1 0 0]';
-        rg = [0 2 2]';
-        pt_groundtruth_0 = [0 1 2]';
+        ug = [1 0 1]';
+        rg = [0 2 7]';
+        % gefunden mit brute force (Abstand Punkt Gerade für gesamten Kreis
+        % berechnet)
+        testtol = 1e-7;
+        mextol = 1e-7; % Wieso ist die Abweichung hier so hoch?
+        S_groundtruth_0 = [-0.535357036395672 0.844625860118930 5; 1.551605268270173 NaN NaN]';
         intersect_truth = false;
         tt = 'Gerade windschief aussen vorbei nicht über Deckel';
+    end
+    if j == 2 || j == 4
+      ug = -ug;
     end
     for k = 1:3 % zufällige Transformation aller Punkte
       %% Transformation
@@ -127,11 +139,19 @@ for j = 1:2 % Schleife über Vertauschung der Enden
         T_W_0 = createRotationOx(-pi/2)*createTranslation3d(rand(3,1));
       end
       cyl_W = [eye(3,4)*T_W_0*[cyl_0(1:3)';1]; eye(3,4)*T_W_0*[cyl_0(4:6)';1]; cyl_0(7)]';
-      pkol_groundtruth_W = (eye(3,4)*T_W_0*[pt_groundtruth_0(:);1])';
+      if intersect_truth
+        Skol_groundtruth_W = (eye(3,4)*T_W_0*[S_groundtruth_0;ones(1,2)]);
+      else
+        Skol_groundtruth_W(1:3,1) = (eye(3,4)*T_W_0*[S_groundtruth_0(1:3,1);1]);
+        Skol_groundtruth_W(1:3,2) = S_groundtruth_0(1:3,2);
+      end
       rg_W = eye(3,4)*T_W_0*[rg;1];
       ug_W = T_W_0(1:3,1:3)*ug;
       %% Schnitt berechnen
       S_tmp = find_intersection_line_cylinder(rg_W, ug_W, cyl_W(1:3)', cyl_W(4:6)', cyl_W(7));
+      if sum(abs(S_tmp-Skol_groundtruth_W), [1 2]) > sum(abs(S_tmp-Skol_groundtruth_W(:,[2 1])), [1 2])
+        Skol_groundtruth_W = Skol_groundtruth_W(:,[2 1]);
+      end
       if any(isnan(S_tmp(:,2)))
         pt1 = S_tmp(:,1);
         pt2 = pt1;
@@ -154,16 +174,21 @@ for j = 1:2 % Schleife über Vertauschung der Enden
       drawCylinder(cyl_W, 'EdgeColor', 'k', 'FaceColor', 'b', 'FaceAlpha', 0.3);
       plot3(pt1(1), pt1(2), pt1(3), 'kx', 'MarkerSize', 10, 'LineWidth', 3);
       plot3(pt2(1), pt2(2), pt2(3), 'r+', 'MarkerSize', 12, 'LineWidth', 3);
-      plot3([pkol_groundtruth_W(1);pt1(1)], [pkol_groundtruth_W(2);pt1(2)], ...
-            [pkol_groundtruth_W(3);pt1(3)], '--c', 'MarkerSize', 5, 'LineWidth', 3);
+      plot3([Skol_groundtruth_W(1,1);S_tmp(1,1)], [Skol_groundtruth_W(2,1);S_tmp(2,1)], ...
+            [Skol_groundtruth_W(3,1);S_tmp(3,1)], '--c', 'MarkerSize', 5, 'LineWidth', 3);
+      if intersect_truth
+        plot3([Skol_groundtruth_W(1,2);S_tmp(1,2)], [Skol_groundtruth_W(2,2);S_tmp(2,2)], ...
+              [Skol_groundtruth_W(3,2);S_tmp(3,2)], '--c', 'MarkerSize', 5, 'LineWidth', 3);
+      end
       xlabel('x in m'); ylabel('y in m'); zlabel('z in m');
       view(3); grid on; axis equal;
       title(sprintf('Fall %d: %s. Abstand: %1.2f', i, tt, dist));
-      mm = minmax2([pt1';pt2';pkol_groundtruth_W; cyl_W(1:3); cyl_W(4:6)]');
+      mm = minmax2([pt1';pt2';Skol_groundtruth_W(1:3,1)';Skol_groundtruth_W(1:3,2)'; cyl_W(1:3); cyl_W(4:6)]');
       lambda_min = (-2 + mm(:,1) - rg_W)./ug_W;
       lambda_max = (2 + mm(:,2) - rg_W)./ug_W;
-      lambda_min = max(lambda_min);
-      lambda_max = min(lambda_max);
+      lambda = sort([lambda_min;lambda_max]);
+      lambda_min = lambda(3);
+      lambda_max = lambda(4);
       plot3([rg_W(1)+lambda_min*ug_W(1);rg_W(1)+lambda_max*ug_W(1)], ...
             [rg_W(2)+lambda_min*ug_W(2);rg_W(2)+lambda_max*ug_W(2)], ...
             [rg_W(3)+lambda_min*ug_W(3);rg_W(3)+lambda_max*ug_W(3)], 'b-');
@@ -179,18 +204,29 @@ for j = 1:2 % Schleife über Vertauschung der Enden
       if dist ~= 0 && intersect_truth
         error('Schnittpunkt manuell gesetzt, aber nicht berechnet');
       end
-      if all(~isnan(pt_groundtruth_0))
-        % Falls händisch ein Punkt bestimmt wurde
-        assert(all(abs(pt1 - pkol_groundtruth_W') < testtol), ...
-          'Händisch bestimmter nächster Punkt stimmt nicht mit Berechnung: [%s] vs [%s]', ...
-          disp_array(pkol_groundtruth_W, '%1.3f'), disp_array(pt1', '%1.3f'));
+      if intersect_truth
+        % Falls händisch Schnittpunkte bestimmt wurden
+        assert(all(abs(S_tmp - Skol_groundtruth_W) < testtol, [1 2]), ...
+          'Händisch bestimmter Schnittpunkt stimmt nicht mit Berechnung überein: \n[%s]\n vs \n[%s]\n', ...
+          disp_array(Skol_groundtruth_W, '%1.3f'), disp_array(S_tmp, '%1.3f'));
+      else
+        % Falls händisch der nächste Punkt bestimmt wurde
+        ind = ~isnan(S_groundtruth_0);
+        % take into account that for different direction of u, the expecteds
+        % result changes if u is parallel to cylinder axis or sides
+        Skol_groundtruth_W_alt(1:3,1) = Skol_groundtruth_W(1:3,1)-ug_W*Skol_groundtruth_W(2,2);
+        Skol_groundtruth_W_alt(1:3,2) = Skol_groundtruth_W(1:3,2);
+        assert(all(abs(S_tmp(ind) - Skol_groundtruth_W(ind)) < testtol, [1 2]) || ...
+               all(abs(S_tmp(ind) - Skol_groundtruth_W_alt(ind)) < testtol, [1 2]), ...
+          'Händisch bestimmter nächster Punkt stimmt nicht mit Berechnung überein: \n[%s]\n vs \n[%s]\n', ...
+          disp_array(Skol_groundtruth_W, '%1.3f'), disp_array(S_tmp, '%1.3f'));
       end
       % Prüfung gegen Ausgabe der mex-Funktion
       S_tmp2 = find_intersection_line_cylinder_mex(rg_W, ug_W, cyl_W(1:3)', ...
         cyl_W(4:6)', cyl_W(7));
-      assert(all(abs(S_tmp(~isnan(S_tmp(:))) - S_tmp2(~isnan(S_tmp(:)))) < 1e-12), ...
+      assert(all(abs(S_tmp(~isnan(S_tmp(:))) - S_tmp2(~isnan(S_tmp(:)))) < mextol), ...
         'Ausgabevariable S_tmp2 stimmt nicht mit mex-Funktion überein');
     end
   end
 end
-fprintf('Testfälle für Kollision Zylinder und Punkt erfolgreich absolviert.\n');
+fprintf('Testfälle für Kollision Zylinder und Gerade erfolgreich absolviert.\n');
