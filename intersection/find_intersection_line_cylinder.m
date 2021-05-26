@@ -32,7 +32,7 @@ function pts = find_intersection_line_cylinder(p, u, p1, p2, r)
     'find_intersection_line_cylinder: p1 has to be [3x1] double');  
   assert(isa(p2,'double') && isreal(p2) && all(size(p2) == [3 1]), ...
     'find_intersection_line_cylinder: p2 has to be [3x1] double');  
- assert(isa(r,'double') && isreal(r) && all(size(r) == [1 1]), ...
+  assert(isa(r,'double') && isreal(r) && all(size(r) == [1 1]), ...
     'find_intersection_line_cylinder: r has to be [3x1] double');  
 
   % Berechne Lotfußpunkt q der windschiefen geraden g1: x=p+s*u; s aus R und
@@ -95,13 +95,11 @@ function pts = find_intersection_line_cylinder(p, u, p1, p2, r)
     if norm(r1)>r
       if u.'*v<0 % u entgegen v, auftreffpunkt auf Seite von p2
         pc1 = p2+r1/norm(r1)*r;
-        s = -norm(v)/norm(u);
       else % u in richtung v, Auftreffpunkt auf Seite von p1
         pc1 = p1+r1/norm(r1)*r;
-        s = norm(v)/norm(u);
       end
       pts = [pc1, [norm(cross(pc1-p,u))/norm(u); norm(v)/norm(u); NaN]];
-      pts = correct_pts(pts);
+      pts = correct_pts(pts, u);
       return;
     else % Schnittpunkte auf beiden Zylinderflächen
       pts = [p1+r1 p2+r1];
@@ -114,7 +112,7 @@ function pts = find_intersection_line_cylinder(p, u, p1, p2, r)
     % kein Schnittpunkt liegt vor, wähle nächsten Punkt
     pc1 = find_next_pkt(q,p1,p2,p,v,u,r);
     pts = [pc1, [norm(cross(pc1-p,u))/norm(u); NaN(2,1)]];
-    pts = correct_pts(pts); % TODO: Hier manchmal falsche Korrekturen
+    pts = correct_pts(pts, u); % TODO: Hier manchmal falsche Korrekturen
     return;
   else % Schnittpunkte gefunden, auf Korrektheit prüfen und ggf. korrigieren
     sqrt_z = sqrt(radikant);
@@ -131,20 +129,23 @@ function pts = find_intersection_line_cylinder(p, u, p1, p2, r)
           pc2 = pc2+(p1-pc2).'*v/(v.'*v)*v;
         end
         pts = [pc2 [norm(cross(pc2-p,u))/norm(u); 2*sqrt_z; NaN]];
-        pts = correct_pts(pts);
-        return;
+        pts = correct_pts(pts, u);
+      else
+        pts = [pc2 pc1];
+        pts = correct_pts(pts, u);
       end
+      return;
     end          
     if (pc1-p1).'*v<0 % Schnittpunkt mit Zylinderfläche um p1 liegt vor
       [pc1,pts,finished] = correct_intersection_k1(q,p1,p2,p,v,u,r);
       if finished
-        pts = correct_pts(pts);
+        pts = correct_pts(pts, u);
         return;
       end
     elseif (pc1-p2).'*v>0 % Schnittpunkt mit Zylinderfläche um p2 liegt vor
       [pc1,pts,finished] = correct_intersection_k2(q,p1,p2,p,v,u,r);
       if finished
-        pts = correct_pts(pts);
+        pts = correct_pts(pts, u);
         return;
       end
     end
@@ -154,7 +155,7 @@ function pts = find_intersection_line_cylinder(p, u, p1, p2, r)
       pc2 = correct_intersection_k2(q,p1,p2,p,v,u,r);
     end
     pts=[pc1, pc2];
-    pts = correct_pts(pts);
+    pts = correct_pts(pts, u);
   end
 end
   
@@ -293,9 +294,13 @@ end
 
 % Hilfsfunktion zur Korrektur von Zylinderschnittpunkten die nur numerisch
 % außerhalb des Zylinders liegen (d<1e-10)
-function pts_out = correct_pts(pts_in)
+function pts_out = correct_pts(pts_in, u)
   if isnan(pts_in(3,2)) && pts_in(1,2)<1e-10
-    pts_out = [pts_in(1:3,1) pts_in(1:3,1)];
+    if ~isnan(pts_in(2,2))
+      pts_out = [pts_in(1:3,1) pts_in(1:3,1)+u*pts_in(2,2)];
+    else
+      pts_out = [pts_in(1:3,1) pts_in(1:3,1)];
+    end
   else
     pts_out = pts_in;
   end
