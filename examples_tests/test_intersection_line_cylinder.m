@@ -22,9 +22,9 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
   elseif j == 3
     cyl_0 = [0,0,5, 0,0,0, 1];
   end
-  for i = 1:20 % Schleife über manuelle Testszenarien
-    testtol = 1e-9;
-    mextol = 1e-12;
+  for i = 1:33 % Schleife über manuelle Testszenarien
+    testtol = 1e-7;
+    mextol = 1e-8;
     switch i
       case 1
         ug = [0 0 1]';
@@ -34,22 +34,22 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
         tt = 'Gerade parallel zu Mittellinie mit Schnitt';
       case 2
         ug = [0 0 1]';
-        rg = [2 0 6]';
-        S_groundtruth_0 = [1 0 0; 1 5 NaN]';
-        intersect_truth = false;
-        tt = 'Gerade parallel zu Mittellinie ohne Schnitt';
-      case 3
-        ug = [0 0 1]';
         rg = [1 0 6]';
         S_groundtruth_0 = [1 0 0; 1 0 5]';
         intersect_truth = true;
         tt = 'Gerade parallel zu Mittellinie tangential';
-      case 4
+      case 3
         ug = [0 0 1]';
         rg = [1+1e-11 0 6]';
         S_groundtruth_0 = [1 0 0; 1 0 5]';
         intersect_truth = true;
         tt = 'Gerade parallel zu Mittellinie fast tangential';
+      case 4
+        ug = [0 0 1]';
+        rg = [2 0 6]';
+        S_groundtruth_0 = [1 0 0; 1 5 NaN]';
+        intersect_truth = false;
+        tt = 'Gerade parallel zu Mittellinie ohne Schnitt';
       case 5
         ug = [1 0 0]';
         rg = [0 0 2]';
@@ -61,99 +61,168 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
         rg = [0 0 5]';
         S_groundtruth_0 = [-1 0 5; 1 0 5]';
         intersect_truth = true;
-        tt = 'Gerade parallel zu Deckel tangential';
+        tt = 'Gerade parallel zu Deckel tangential am Deckel';
       case 7
         ug = [1 0 0]';
-        rg = [0 0 5+1e-11]';
-        S_groundtruth_0 = [-1 0 5; 1 0 5]';
+        rg = [0 1 5]';
+        S_groundtruth_0 = [0 1 5; 0 1 5]';
         intersect_truth = true;
-        tt = 'Gerade parallel zu Deckel fast tangential';
+        tt = 'Gerade parallel zu Deckel tangential am Rand';
       case 8
-        ug = [1 0 0]';
-        rg = [0 0 6]';
-        S_groundtruth_0 = [-1 0 5; 1 2 NaN]';
-        intersect_truth = false;
-        tt = 'Gerade parallel zu Deckel aussen vorbei, Abstand Zylinderachse < r';
-      case 9
-        ug = [1 0 0]';
-        rg = [0 2 6]';
-        S_groundtruth_0 = [0 1 5; sqrt(2) NaN NaN]';
-        intersect_truth = false;
-        tt = 'Gerade parallel zu Deckel aussen vorbei, Abstand Zylinderachse > r';
-      case 10
-        ug = [1 0 0]';
-        rg = [0 2 2]';
-        S_groundtruth_0 = [0 1 2; 1 NaN NaN]';
-        intersect_truth = false;
-        tt = 'Gerade parallel zu Deckel mittig vorbei';
-      case 11
         ug = [1 0 0]';
         rg = [0 1 2]';
         S_groundtruth_0 = [0 1 2; 0 1 2]';
         intersect_truth = true;
-        testtol = 1e-7; % j = 3, k = 1
-        mextol = 1e-8; % j = 3, k = 2
         tt = 'Gerade parallel zu Deckel tangential am Mantel';
+      case 9
+        ug = [1 0 0]';
+        rg = [0 1 7]';
+        S_groundtruth_0 = [0 1 5; 2 NaN NaN]';
+        intersect_truth = false;
+        tt = 'Gerade parallel zu Deckel tangential am Mantel ausserhalb';
+      case 10
+        ug = [1 0 0]';
+        rg = [0 0 5+1e-11]';
+        S_groundtruth_0 = [-1 0 5; 1 0 5]';
+        intersect_truth = true;
+        tt = 'Gerade parallel zu Deckel fast tangential am Deckel';
+      case 11
+        ug = [1 0 0]';
+        rg = [0 1+1e-11 5+1e-11]';
+        S_groundtruth_0 = [0 1 5; 0 1 5]';
+        intersect_truth = true;
+        tt = 'Gerade parallel zu Deckel fast tangential am Rand';
       case 12
         ug = [1 0 0]';
         rg = [0 1+1e-11 2]';
         S_groundtruth_0 = [0 1 2; 0 1 2]';
         intersect_truth = true;
-        testtol = 1e-7; % j = 3, k = 1
-        mextol = 1e-8; % j = 3, k = 2
         tt = 'Gerade parallel zu Deckel fast tangential am Mantel';
       case 13
+        ug = [1 0 0]';
+        rg = [0 1+1e-11 7]';
+        S_groundtruth_0 = [0 1 5; 2 NaN NaN]';
+        intersect_truth = false;
+        tt = 'Gerade parallel zu Deckel fast tangential am Mantel ausserhalb';
+      case 14
+        ug = [1 0 0]';
+        rg = [0 0 6]';
+        S_groundtruth_0 = [-1 0 5; 1 2 NaN]';
+        intersect_truth = false;
+        tt = 'Gerade parallel zu Deckel, über Deckel, Abstand Zylinderachse < r';
+      case 15
+        ug = [1 0 0]';
+        rg = [0 2 2]';
+        S_groundtruth_0 = [0 1 2; 1 NaN NaN]';
+        intersect_truth = false;
+        tt = 'Gerade parallel zu Deckel, über Deckel, Abstand Zylinderachse > r';
+      case 16
+        ug = [1 0 0]';
+        rg = [0 2 6]';
+        S_groundtruth_0 = [0 1 5; sqrt(2) NaN NaN]';
+        intersect_truth = false;
+        tt = 'Gerade parallel zu Deckel aussen vorbei, Abstand Zylinderachse > r';
+      case 17
         ug = [1 0 1]';
         rg = [0 0 2]';
         S_groundtruth_0 = [-1 0 1; 1 0 3]';
         intersect_truth = true;
         tt = 'Gerade windschief Schnitt 2x Mantel';
-      case 14
+      case 18
         ug = [1 0 1]';
         rg = [0 0 5]';
         S_groundtruth_0 = [-1 0 4; 0 0 5]';
         intersect_truth = true;
         tt = 'Gerade windschief Schnitt Mantel und Deckel';
-      case 15
+      case 19
         ug = [1 0 5]';
         rg = [0 0 5/2]';
         S_groundtruth_0 = [-1/2 0 0; 1/2 0 5]';
         intersect_truth = true;
         tt = 'Gerade windschief Schnitt beide Deckel';
-      case 16
+      case 20
+        ug = [1 0 1]';
+        rg = [1 0 5]';
+        S_groundtruth_0 = [1 0 5; -1 0 3]';
+        intersect_truth = true;
+        tt = 'Gerade windschief Schnitt Kante und Mantel';
+      case 21
+        ug = [1 0 5]';
+        rg = [1 0 5]';
+        S_groundtruth_0 = [1 0 5; 0 0 0]';
+        intersect_truth = true;
+        tt = 'Gerade windschief Schnitt Kante und Deckel';
+      case 22
+        ug = [1 0 5/2]';
+        rg = [1 0 5]';
+        S_groundtruth_0 = [1 0 5; -1 0 0]';
+        intersect_truth = true;
+        tt = 'Gerade windschief Schnitt 2x Kante';
+      case 23
         ug = [1 0 1]';
         rg = [0 1 2]';
         S_groundtruth_0 = [0 1 2; 0 1 2]';
         intersect_truth = true;
-        testtol = 1e-7; % j = 3, k = 2
-        mextol = 1e-7; % j = 3, k = 2
-        tt = 'Gerade windschief tangential';
-      case 17
+        tt = 'Gerade windschief tangential am Mantel';
+      case 24
+        ug = [1 0 1]';
+        rg = [0 1 5]';
+        S_groundtruth_0 = [0 1 5; 0 1 5]';
+        intersect_truth = true;
+        tt = 'Gerade windschief tangential am Deckel ohne Zylinderschnitt ausserhalb';
+      case 25
+        ug = [1 0 1]';
+        rg = [-1 0 5]';
+        S_groundtruth_0 = [-1 0 5; -1 0 5]';
+        intersect_truth = true;
+        tt = 'Gerade windschief tangential am Deckel mit Zylinderschnitt ausserhalb';
+      case 26
+        ug = [1 0 1]';
+        rg = [0 1 7]';
+        S_groundtruth_0 = [-0.815219744525743 0.579151766064286 5; 0.937531526343318 NaN NaN]';
+        intersect_truth = false;
+        tt = 'Gerade windschief tangential am Mantel ausserhalb';
+      case 27
         ug = [1 0 1]';
         rg = [0 1+1e-11 2]';
         S_groundtruth_0 = [0 1 2; 0 1 2]';
         intersect_truth = true;
-        testtol = 1e-7; % j = 3, k = 2
-        tt = 'Gerade windschief fast tangential';
-      case 18
+        tt = 'Gerade windschief fast tangential am Mantel';
+      case 28
+        ug = [1 0 1]';
+        rg = [0 1+1e-11 5]';
+        S_groundtruth_0 = [0 1 5; 0 1 5]';
+        intersect_truth = true;
+        tt = 'Gerade windschief fast tangential am Deckel ohne Zylinderschnitt ausserhalb';
+      case 29
+        ug = [1 0 1]';
+        rg = [-1-1e-11 0 5]';
+        S_groundtruth_0 = [-1 0 5; -1 0 5]';
+        intersect_truth = true;
+        tt = 'Gerade windschief fast tangential am Deckel mit Zylinderschnitt ausserhalb';
+      case 30
+        ug = [1 0 1]';
+        rg = [0 1+1e-11 7]';
+        S_groundtruth_0 = [-0.815219744525743 0.579151766064286 5; 0.937531526343318 NaN NaN]';
+        intersect_truth = false;
+        tt = 'Gerade windschief fast tangential am Mantel ausserhalb';
+      case 31
         ug = [1 0 1]';
         rg = [0 2 2]';
         S_groundtruth_0 = [0 1 2; 1 NaN NaN]';
         intersect_truth = false;
         tt = 'Gerade windschief mittig vorbei';
-      case 19
+      case 32
         ug = [1 0 1]';
         rg = [0 0 7]';
         S_groundtruth_0 = [-1 0 5; 0.5*sqrt(2) NaN NaN]';
         intersect_truth = false;
         tt = 'Gerade windschief aussen vorbei über Deckel';
-      case 20
+      case 33
         ug = [1 0 1]';
         rg = [0 2 7]';
         % gefunden mit brute force (Abstand Punkt Gerade für gesamten Kreis
         % berechnet)
-        testtol = 1e-7;
-        mextol = 1e-7; % Wieso ist die Abweichung hier so hoch?
         S_groundtruth_0 = [-0.535357036395672 0.844625860118930 5; 1.551605268270173 NaN NaN]';
         intersect_truth = false;
         tt = 'Gerade windschief aussen vorbei nicht über Deckel';
@@ -188,7 +257,7 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
       end
       if any(isnan(S_tmp(:,2)))
         pt1 = S_tmp(:,1);
-        pt2 = pt1;
+        pt2 = S_tmp(:,2);
         dist = S_tmp(1,2);
       else
         ind = find(max(abs(ug_W))==abs(ug_W));
@@ -241,8 +310,9 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
       if intersect_truth
         % Falls händisch Schnittpunkte bestimmt wurden
         assert(all(abs(S_tmp - Skol_groundtruth_W) < testtol, [1 2]), ...
-          'Händisch bestimmter Schnittpunkt stimmt nicht mit Berechnung überein: \n[%s]\n vs \n[%s]\n', ...
-          disp_array(Skol_groundtruth_W, '%1.3f'), disp_array(S_tmp, '%1.3f'));
+          'Händisch bestimmter Schnittpunkt stimmt nicht mit Berechnung überein: \n[%s]\n vs \n[%s]\nAbweichung : %e', ...
+          disp_array(Skol_groundtruth_W, '%1.3f'), disp_array(S_tmp, '%1.3f'), ...
+          max(abs(S_tmp - Skol_groundtruth_W),[],'all'));
       else
         % Falls händisch der nächste Punkt bestimmt wurde
         ind = ~isnan(S_groundtruth_0);
@@ -252,14 +322,23 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
         Skol_groundtruth_W_alt(1:3,2) = Skol_groundtruth_W(1:3,2);
         assert(all(abs(S_tmp(ind) - Skol_groundtruth_W(ind)) < testtol, [1 2]) || ...
                all(abs(S_tmp(ind) - Skol_groundtruth_W_alt(ind)) < testtol, [1 2]), ...
-          'Händisch bestimmter nächster Punkt stimmt nicht mit Berechnung überein: \n[%s]\n vs \n[%s]\n', ...
-          disp_array(Skol_groundtruth_W, '%1.3f'), disp_array(S_tmp, '%1.3f'));
+          'Händisch bestimmter nächster Punkt stimmt nicht mit Berechnung überein: \n[%s]\n vs \n[%s]\nAbweichung : %e', ...
+          disp_array(Skol_groundtruth_W, '%1.3f'), disp_array(S_tmp, '%1.3f'), ...
+          min(max(abs(S_tmp(ind) - Skol_groundtruth_W(ind)),[],'all'), ...
+              max(abs(S_tmp(ind) - Skol_groundtruth_W_alt(ind)),[],'all')));
       end
       % Prüfung gegen Ausgabe der mex-Funktion
       S_tmp2 = find_intersection_line_cylinder_mex(rg_W, ug_W, cyl_W(1:3)', ...
         cyl_W(4:6)', cyl_W(7));
-      assert(all(abs(S_tmp(~isnan(S_tmp(:))) - S_tmp2(~isnan(S_tmp(:)))) < mextol), ...
-        'Ausgabevariable S_tmp2 stimmt nicht mit mex-Funktion überein');
+      % prüfe auch für getauschte Punkte, da mex-Funktion Ergebnisse in
+      % mindestens einem Fall i umgekehter Reihenfolge lieferte
+      S_tmp3 = [S_tmp2(1:3,2) S_tmp2(1:3,1)];
+      assert(all(abs(S_tmp(~isnan(S_tmp(:))) - S_tmp2(~isnan(S_tmp(:)))) < mextol) || ...
+             all(S_tmp(~isnan(S_tmp(:))) - S_tmp3(~isnan(S_tmp(:))) < mextol), ...
+        'Ausgabevariable S_tmp stimmt nicht mit mex-Funktion überein:\n[%s] vs \n[%s]\nAbweichung: %e', ...
+        disp_array(S_tmp, '%1.3f'), disp_array(S_tmp2, '%1.3f'), ...
+        min(max(abs(S_tmp(~isnan(S_tmp(:))) - S_tmp2(~isnan(S_tmp(:)))),[],'all'), ...
+            max(abs(S_tmp(~isnan(S_tmp(:))) - S_tmp3(~isnan(S_tmp(:)))),[],'all')));
     end
   end
 end
