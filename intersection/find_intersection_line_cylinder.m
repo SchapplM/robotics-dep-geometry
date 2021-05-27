@@ -25,15 +25,15 @@
 function pts = find_intersection_line_cylinder(p, u, p1, p2, r)
 
   assert(isa(p,'double') && isreal(p) && all(size(p) == [3 1]), ...
-    'find_intersection_line_cylinder: p has to be [3x1] double');  
+    'find_intersection_line_cylinder: p has to be [3x1] double');
   assert(isa(u,'double') && isreal(u) && all(size(u) == [3 1]), ...
-    'find_intersection_line_cylinder: u has to be [3x1] double');  
+    'find_intersection_line_cylinder: u has to be [3x1] double');
   assert(isa(p1,'double') && isreal(p1) && all(size(p1) == [3 1]), ...
-    'find_intersection_line_cylinder: p1 has to be [3x1] double');  
+    'find_intersection_line_cylinder: p1 has to be [3x1] double');
   assert(isa(p2,'double') && isreal(p2) && all(size(p2) == [3 1]), ...
-    'find_intersection_line_cylinder: p2 has to be [3x1] double');  
+    'find_intersection_line_cylinder: p2 has to be [3x1] double');
   assert(isa(r,'double') && isreal(r) && all(size(r) == [1 1]), ...
-    'find_intersection_line_cylinder: r has to be [3x1] double');  
+    'find_intersection_line_cylinder: r has to be [3x1] double');
 
   % Berechne Lotfußpunkt q der windschiefen geraden g1: x=p+s*u; s aus R und
   % g2: x=p1+t*v; v=p2-p1, t aus R auf der geraden g1. Dazu wird die
@@ -63,11 +63,11 @@ function pts = find_intersection_line_cylinder(p, u, p1, p2, r)
   % wird geprüft, ob Sie auf dem zum Zylinder gehörigen Teil des unendlichen
   % Zylinders liegen. Das ist der Fall, wenn (q-p2)*v<0 und
   % (q-p1)*v>0 ist. Ist die erste Bedingung verletzt, gibt es
-  % (mindestens) eine Schnittpunkt mit der Randfläche um p1, ist die zweite
+  % (mindestens) einen Schnittpunkt mit der Randfläche um p1, ist die zweite
   % Bedingung verletzt, gibt es (mindestens) eine Schnittpunkt mit der
   % Randfläche um p2. Dies folgt daraus, dass die Skalarprodukte die
   % relative Richtung der Projektion des Vektors von pi nach q auf den
-  % Vektor von p1 nach p2 angibt. für die beiden Randflächen wird, falls
+  % Vektor von p1 nach p2 angibt. Für die beiden Randflächen wird, falls
   % notwendig der Schnittpunkt nach folgendem Ansatz berechnet: zuerst wird
   % der Schnittpunkt qi von g1 mit der Ebene E_i: (x-pi)*v=0 berechnet
   % und anschließend geprüft, ob |qi-pi|<r gilt.
@@ -90,15 +90,16 @@ function pts = find_intersection_line_cylinder(p, u, p1, p2, r)
   % q3 = p1+(q-p1)*v/v^2*v von da aus gehen wir um die Länge r in
   % Richtung (q-q3), um den gesuchten Punkt zu finden.
   
-  if norm(cuv)/(norm(u)*norm(v))<1e-10 % u parralel zu Zylinderachse
+  % Fall 1: g parallel zum Mantel
+  if norm(cuv)/(norm(u)*norm(v)) < 1e-10
     r1 = p-p1-(p-p1).'*u/(u.'*u)*u;
-    if norm(r1)>r
-      if u.'*v<0 % u entgegen v, auftreffpunkt auf Seite von p2
-        pc1 = p2+r1/norm(r1)*r;
+    if norm(r1) > r*(1+1e-10)
+      if u.'*v < 0 % u entgegen v, auftreffpunkt auf Seite von p2
+        p_c = p2+r1/norm(r1)*r;
       else % u in richtung v, Auftreffpunkt auf Seite von p1
-        pc1 = p1+r1/norm(r1)*r;
+        p_c = p1+r1/norm(r1)*r;
       end
-      pts = [pc1, [norm(cross(pc1-p,u))/norm(u); norm(v)/norm(u); NaN]];
+      pts = [p_c, [norm(cross(p_c-p,u))/norm(u); norm(v)/norm(u); NaN]];
       pts = correct_pts(pts, u);
       return;
     else % Schnittpunkte auf beiden Zylinderflächen
@@ -108,86 +109,76 @@ function pts = find_intersection_line_cylinder(p, u, p1, p2, r)
   end
   
   radikant = (cuv.'*cpp1v)^2/(cuv.'*cuv)^2-(cpp1v.'*cpp1v-r^2*(v.'*v))/(cuv.'*cuv);
-  if radikant < 0 || isnan(radikant)
+  
+  % Fall 2: g parallel zum Deckel
+  if abs(u.'*v/(norm(u)*norm(v))) < 1e-10
+    if radikant < 0
+      q3 = p1+(q-p1).'*v/(v.'*v)*v;
+      q3q = q-q3;
+      if (q-p1).'*v < 0 % q jenseits von p1
+        p_c = p1 + q3q/norm(q3q)*r;
+      elseif (q-p2).'*v > 0 % q jenseits von p2
+        p_c = p2 + q3q/norm(q3q)*r;
+      else % q zwischen p1 und p2
+        p_c = q3 + q3q/norm(q3q)*r;
+      end
+      pts = [p_c [norm(cross(p_c-p,u))/norm(u); 0; NaN]];
+      pts = correct_pts(pts, u);
+    else
+      sqrt_z = sqrt(radikant);
+      s_z = -cuv.'*cpp1v/(cuv.'*cuv);
+      s1  = s_z+sqrt_z;
+      s2  = s_z-sqrt_z;
+      pc2 = p + s2*u;
+      if (q-p1).'*v < 0 % q jenseits von p1
+        p_c = pc2+(p1-pc2).'*v/(v.'*v)*v;
+      elseif (q-p2).'*v > 0 % q jenseits von p2
+        p_c = pc2+(p2-pc2).'*v/(v.'*v)*v;
+      else % q zwischen p1 und p2
+        pts = [pc2 p+s1*u];
+        return;
+      end
+      pts = [p_c [norm(cross(p_c-p,u))/norm(u); 2*sqrt_z; NaN]];
+      pts = correct_pts(pts, u);
+    end
+    return;
+  end
+  
+  % Fall 3: g windschief zur Zylinderachse
+  if radikant < 0
     % kein Schnittpunkt liegt vor, wähle nächsten Punkt
     pc1 = find_next_pkt(q,p1,p2,p,v,u,r);
     pts = [pc1, [norm(cross(pc1-p,u))/norm(u); NaN(2,1)]];
-    pts = correct_pts(pts, u); % TODO: Hier manchmal falsche Korrekturen
+    pts = correct_pts(pts, u);
     return;
-  else % Schnittpunkte gefunden, auf Korrektheit prüfen und ggf. korrigieren
+  else % Schnittpunkte moeglich
     sqrt_z = sqrt(radikant);
     s_z = -cuv.'*cpp1v/(cuv.'*cuv);
     s1  = s_z+sqrt_z;
     s2  = s_z-sqrt_z;
-    pc1 = p+s1*u;
-    pc2 = p+s2*u;
-    if abs(u.'*v/(norm(u)*norm(v)))<1e-10 % g parallel zur Zylinderfläche
-      if ((p1-pc1).'*v)*((p2-pc1).'*v)>0 % kein Schnittpunkt, da g jenseits von p1 oder p2 verlaeuft
-        if (p1-pc1).'*v<=0 % g jenseis von p2
-          pc2 = pc2+(p2-pc2).'*v/(v.'*v)*v;
-        else % g jenseits von p1
-          pc2 = pc2+(p1-pc2).'*v/(v.'*v)*v;
-        end
-        pts = [pc2 [norm(cross(pc2-p,u))/norm(u); 2*sqrt_z; NaN]];
-        pts = correct_pts(pts, u);
-      else
-        pts = [pc2 pc1];
-        pts = correct_pts(pts, u);
-      end
-      return;
-    end          
-    if (pc1-p1).'*v<0 % Schnittpunkt mit Zylinderfläche um p1 liegt vor
-      [pc1,pts,finished] = correct_intersection_k1(q,p1,p2,p,v,u,r);
-      if finished
-        pts = correct_pts(pts, u);
-        return;
-      end
-    elseif (pc1-p2).'*v>0 % Schnittpunkt mit Zylinderfläche um p2 liegt vor
-      [pc1,pts,finished] = correct_intersection_k2(q,p1,p2,p,v,u,r);
-      if finished
+    s3  = (p1-p).'*v/(u.'*v);
+    s4  = (p2-p).'*v/(u.'*v);
+    if (q-p1).'*v < 0 % q jenseits von p1
+      p_c = p + s3*u;
+      if norm(p_c-p1) > r % kein Schnittpunkt
+        p_c = find_next_pkt(q,p1,p2,p,v,u,r);
+        pts = [p_c, [norm(cross(p_c-p,u))/norm(u); NaN(2,1)]];
         pts = correct_pts(pts, u);
         return;
       end
     end
-    if (pc2-p1).'*v<0 % Schnittpunkt mit Halbkugel um p1 liegt vor
-      pc2 = correct_intersection_k1(q,p1,p2,p,v,u,r);
-    elseif (pc2-p2).'*v>0 % Schnittpunkt mit Halbkugel um p2 liegt vor
-      pc2 = correct_intersection_k2(q,p1,p2,p,v,u,r);
+    if (q-p2).'*v > 0 % q jenseits von p2
+      p_c = p + s4*u;
+      if norm(p_c-p2) > r % kein Schnittpunkt
+        p_c = find_next_pkt(q,p1,p2,p,v,u,r);
+        pts = [p_c, [norm(cross(p_c-p,u))/norm(u); NaN(2,1)]];
+        pts = correct_pts(pts, u);
+        return;
+      end
     end
-    pts=[pc1, pc2];
-    pts = correct_pts(pts, u);
-  end
-end
-  
-
-
-% Hilfsfunktion zur Korrektheitsprüfung und Korrektur der
-% Zylinderschnittpunkte an der Seite p1
-function [p_out,pts,finished] = correct_intersection_k1(q,p1,p2,p,v,u,r)
-  finished = 0;
-  pts = NaN(3,2);
-  s = (p1-p).'*v/(u.'*v);
-  p_out = p+s*u;
-  if (p1-p_out).'*(p1-p_out)>r^2 || any(isnan(p_out)) % falls keine Schnittpunkte vorliegen: nächster pkt
-    p_out = find_next_pkt(q,p1,p2,p,v,u,r);
-    pts = [p_out [norm(cross(p_out-p,u))/norm(u); NaN(2,1)]];
-    finished=1;
-    return;
-  end
-end
-
-% Hilfsfunktion zur Korrektheitsprüfung und Korrektur der
-% Zylinderschnittpunkte an der Seite p2
-function [p_out,pts,finished] = correct_intersection_k2(q,p1,p2,p,v,u,r)
-  finished = 0;
-  pts = NaN(3,2);
-  s = (p2-p).'*v/(u.'*v);
-  p_out = p+s*u;
-  if (p2-p_out).'*(p2-p_out)>r^2 || any(isnan(p_out)) % falls keine Schnittpunkte vorliegen: nächster pkt
-    p_out = find_next_pkt(q,p1,p2,p,v,u,r);
-    pts = [p_out [norm(cross(p_out-p,u))/norm(u); NaN(2,1)]];
-    finished=1;
-    return;
+    % Die relevanten Schnittpunkte sind immer die mittleren beiden
+    s = sort([s1,s2,s3,s4]);
+    pts = [p + s(2)*u, p + s(3)*u];
   end
 end
 
@@ -213,31 +204,23 @@ end
 % p_out
 %   Nächster Punkt auf dem Zylinder
 function p_out = find_next_pkt(q,p1,p2,p,v,u,r)
-  if (q-p1).'*v<0
-    if abs(u.'*v/(norm(u)*norm(v)))<1e-10 % gerade g parallel zu zylinderoberfläche
-      p_c = p+(p1-p).'*u/(u.'*u)*u; % TODO: Hier Fehler in manchen Grenzfällen.
-    else
-      p_in = p+(p1-p).'*v/(u.'*v)*u;
-      p_c = golden_section_search(q, p_in, p1, v, r);
-    end
+  if (q-p1).'*v < 0 % q jenseits von p1
+    p_in = p+(p1-p).'*v/(u.'*v)*u;
+    p_c = golden_section_search(q, p_in, p1, v, r);
     p_c_p = p_c+(p1-p_c).'*v/(v.'*v)*v;
-    p_c_pp1 = p_c_p-p1; 
+    p_c_pp1 = p_c_p-p1;
     p_c = p1+(p_c_pp1)/norm(p_c_pp1)*r;
-  elseif (q-p2).'*v>0
-    if abs(u.'*v/(norm(u)*norm(v)))<1e-10 % gerade g parallel zu zylinderoberfläche
-      p_c = p+(p2-p).'*u/(u.'*u)*u; % TODO: Fehler in Grenzfällen.
-    else
-      p_in = p+(p2-p).'*v/(u.'*v)*u;
-      p_c = golden_section_search(q, p_in, p2, v, r);
-    end
+  elseif (q-p2).'*v > 0 % q jenseits von p2
+    p_in = p+(p2-p).'*v/(u.'*v)*u;
+    p_c = golden_section_search(q, p_in, p2, v, r);
     p_c_p = p_c+(p2-p_c).'*v/(v.'*v)*v;
-    p_c_pp2 = p_c_p-p2; 
+    p_c_pp2 = p_c_p-p2;
     p_c = p2+(p_c_pp2)/norm(p_c_pp2)*r;
-  else
+  else % q zwischen p1 und p2
     q3  = p1+(q-p1).'*v/(v.'*v)*v;
     p_c = q3+(q-q3)/norm(q-q3)*r;
   end
-  p_out=p_c;
+  p_out = p_c;
 end
 
 % Hilfsfunktion zur Berechnung des Abstandes eines Punktes zu einer
@@ -295,7 +278,7 @@ end
 % Hilfsfunktion zur Korrektur von Zylinderschnittpunkten die nur numerisch
 % außerhalb des Zylinders liegen (d<1e-10)
 function pts_out = correct_pts(pts_in, u)
-  if isnan(pts_in(3,2)) && pts_in(1,2)<1e-10
+  if isnan(pts_in(3,2)) && pts_in(1,2) < 1e-10
     if ~isnan(pts_in(2,2))
       pts_out = [pts_in(1:3,1) pts_in(1:3,1)+u*pts_in(2,2)];
     else
@@ -305,4 +288,3 @@ function pts_out = correct_pts(pts_in, u)
     pts_out = pts_in;
   end
 end
-    
