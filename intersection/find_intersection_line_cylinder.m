@@ -17,7 +17,8 @@
 %   intersection points, or nearest point on cylinder and distance to
 %   nearest point as well as line parameter until which the same distance is
 %   kept if line is parallel to zylinder axis or side planes stacked with NaNs,
-%   when no intersections exist
+%   when no intersections exist. The returned values are ordered such that the
+%   value with the smaller s in x = p+s*u is returned in the first column.
 
 % Jonathan Vorndamme, vorndamme@irt.uni-hannover.de, 2016-06
 % (c) Institut für Regelungstechnik, Universität Hannover
@@ -34,6 +35,60 @@ function pts = find_intersection_line_cylinder(p, u, p1, p2, r)
     'find_intersection_line_cylinder: p2 has to be [3x1] double');
   assert(isa(r,'double') && isreal(r) && all(size(r) == [1 1]), ...
     'find_intersection_line_cylinder: r has to be [3x1] double');
+  
+  % Die Eingaben definieren den Zylinder durch die Mittelpunkte der Deckel p1
+  % und p2 sowie den Radius r und die Gerade g: x = p+s*u. Die Zylinderachse
+  % ergibt sich daraus zu v = p2-p1.
+  % Grundsätzlich werden drei Fälle unterschieden: 
+  % 1. v parallel zu u: Hier gibt es drei Fälle: die Deckel werden geschnitten
+  % (Ergebnis sind zwei Schnittpunkte mit den Deckeln), der Mantel wird tangiert
+  % (Ergebnis sind zwei Schnittpunkte mit den Deckeln), die geraden schneidet
+  % den Zylinder nicht (Ergebnis ist der Schnittpunkt mit der Deckelfläche mit
+  % dem niedrigeren s-Parameter in der Geradegleichung x = p+s*u, sowie der
+  % Abstand zum Mantel und die Länge des Zylinders).
+  % Für die Fälle 2 und 3 wird zunächst der Punkt q auf der geraden g berechnet
+  % der der Zylinderachse am nächsten ist.
+  % 2. v parallel zu den Deckelflächen: zunächst wird unterschieden ob der
+  % Abstand von zur Zylinderachse größer ist als r (keine Schnittpunkte, der
+  % Nächste Punkt ist entweder der Punkt auf dem Weg von q zur Zylinderachse mit
+  % Abstand r zur Zylinderachse (wenn q zwischen den Deckelflächen liegt) oder
+  % die Projektion auf die Deckelfläche auf deren Seite die Gerade g liegt. Ist
+  % der Abstand von q zur Zylinderachse kleiner als r wird unterschieden, ob q
+  % zwischen den Deckelflächen liegt (Ergebnis zwei Schnittpunkte) oder
+  % Ausserhalb (Ergebnis Projektion des Schnittpunktes von g mit dem unendlichen
+  % Zylinder in die Deckelfläche uf deren Seite g verläuft, Abstand zum Deckel
+  % und die Länge vom 1. bis zum 2. Schnittpunkt mit dem unendlichen Zylinder.
+  % 3. v windschief zu u: Zunächst wird wieder unterschieden, ob der Abstand von
+  % q zur Zylinderachse größer als r ist. In diesem Fall wird der nächste Punkt
+  % numerisch bestimmt nach dem Verfahren des goldenen Schnitts. Anderenfalls
+  % wird geschaut ob die Gerade g den Zylinder schneidet. Das ist der Fall, wenn
+  % entweder q zwischen den Deckelflächen liegt oder q jenseits einer der
+  % Deckelflächen liegt, aber der Schnittpunkt von g mit den Deckelflächen
+  % innerhalb des Deckels liegt. Liegen CShnittpunkte vor werden die
+  % Cshnittpunkte von g mit dem unendlichen Zylinder und den Deckelflächen
+  % berechnet und nach ihren s-Parameetern sortiert. Die mittleren beiden Punkte
+  % sind dann das Resultat. Liegen keine Schnittpunkte vor wird erneut das
+  % Verfahren nach dem goldenen Schnitt bemüht.
+  
+  v = p2-p1;
+  cuv = cross(u,v);
+  % Fall 1: g parallel zum Mantel
+  if norm(cuv)/(norm(u)*norm(v)) < 1e-10
+    r1 = p-p1-(p-p1).'*u/(u.'*u)*u;
+    if norm(r1) > r*(1+1e-10)
+      if u.'*v < 0 % u entgegen v, auftreffpunkt auf Seite von p2
+        p_c = p2+r1/norm(r1)*r;
+      else % u in richtung v, Auftreffpunkt auf Seite von p1
+        p_c = p1+r1/norm(r1)*r;
+      end
+      pts = [p_c, [norm(cross(p_c-p,u))/norm(u); norm(v)/norm(u); NaN]];
+      pts = correct_pts(pts, u);
+      return;
+    else % Schnittpunkte auf beiden Zylinderflächen
+      pts = [p1+r1 p2+r1];
+      return;
+    end
+  end
 
   % Berechne Lotfußpunkt q der windschiefen geraden g1: x=p+s*u; s aus R und
   % g2: x=p1+t*v; v=p2-p1, t aus R auf der geraden g1. Dazu wird die
@@ -48,8 +103,6 @@ function pts = find_intersection_line_cylinder(p, u, p1, p2, r)
   % <=> s=((p1-p)*(v x (u x v)))/((u x v)*(u x v)), da a*(b x c)=(a x b)*c
   % <=> s=((p1-p)*(v x (u x v)))/|u x v|^2
   % daraus folgt q = p+s*u=p+((p1-p)*(v x (u x v)))/|u x v|^2*u.
-  v = p2-p1;
-  cuv = cross(u,v);
   q = p+((p1-p).'*cross(v,cuv))/(cuv.'*cuv)*u;
   % Nun muss festgestellt werden, ob q innerhalb des Zylinders liegt. Dazu
   % berechnen wir die Schnittpunkte von g1 mit dem unendlichen Zylinder. Dazu
@@ -76,8 +129,6 @@ function pts = find_intersection_line_cylinder(p, u, p1, p2, r)
   % s = (p2-p)*v/(u*v)
   % für die Randfläche um p2.
   
-
-
   cpp1v  = cross(p-p1,v);
   % Wenn keine Schnittpunkte vorliegen, muss der Punkt auf dem Zylinder
   % berechnet werden, der der Geraden g1 am nächsten liegt. Dazu werden
@@ -89,24 +140,6 @@ function pts = find_intersection_line_cylinder(p, u, p1, p2, r)
   % q3 auf g2 können wir durch eine Projektion von q-p1 auf v berechnen:
   % q3 = p1+(q-p1)*v/v^2*v von da aus gehen wir um die Länge r in
   % Richtung (q-q3), um den gesuchten Punkt zu finden.
-  
-  % Fall 1: g parallel zum Mantel
-  if norm(cuv)/(norm(u)*norm(v)) < 1e-10
-    r1 = p-p1-(p-p1).'*u/(u.'*u)*u;
-    if norm(r1) > r*(1+1e-10)
-      if u.'*v < 0 % u entgegen v, auftreffpunkt auf Seite von p2
-        p_c = p2+r1/norm(r1)*r;
-      else % u in richtung v, Auftreffpunkt auf Seite von p1
-        p_c = p1+r1/norm(r1)*r;
-      end
-      pts = [p_c, [norm(cross(p_c-p,u))/norm(u); norm(v)/norm(u); NaN]];
-      pts = correct_pts(pts, u);
-      return;
-    else % Schnittpunkte auf beiden Zylinderflächen
-      pts = [p1+r1 p2+r1];
-      return;
-    end
-  end
   
   radikant = (cuv.'*cpp1v)^2/(cuv.'*cuv)^2-(cpp1v.'*cpp1v-r^2*(v.'*v))/(cuv.'*cuv);
   

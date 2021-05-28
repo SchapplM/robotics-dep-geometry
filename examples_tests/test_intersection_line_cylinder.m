@@ -229,6 +229,12 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
     end
     if j == 2 || j == 4
       ug = -ug;
+      % Bei umgedrehter Richtung von u wird auch das ergebnis anders herum sein
+      if ~isnan(S_groundtruth_0(3,2))
+        S_groundtruth_0 = S_groundtruth_0(1:3,[2 1]);
+      elseif ~isnan(S_groundtruth_0(2,2))
+        S_groundtruth_0(1:3,1) = S_groundtruth_0(1:3,1)-S_groundtruth_0(2,2)*ug/norm(ug);
+      end
     end
     for k = 1:3 % zufällige Transformation aller Punkte
       %% Transformation
@@ -255,21 +261,11 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
       if sum(abs(S_tmp-Skol_groundtruth_W), [1 2]) > sum(abs(S_tmp-Skol_groundtruth_W(:,[2 1])), [1 2])
         Skol_groundtruth_W = Skol_groundtruth_W(:,[2 1]);
       end
+      pt1 = S_tmp(:,1);
+      pt2 = S_tmp(:,2);
       if any(isnan(S_tmp(:,2)))
-        pt1 = S_tmp(:,1);
-        pt2 = S_tmp(:,2);
         dist = S_tmp(1,2);
       else
-        ind = find(max(abs(ug_W))==abs(ug_W));
-        lambda1 = S_tmp(ind,1)/ug_W(ind);
-        lambda2 = S_tmp(ind,2)/ug_W(ind);
-        if lambda1 < lambda2
-          pt1 = S_tmp(:,1);
-          pt2 = S_tmp(:,2);
-        else
-          pt1 = S_tmp(:,2);
-          pt2 = S_tmp(:,1);
-        end
         dist = 0;
       end
       %% Zeichnen
@@ -318,27 +314,20 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
         ind = ~isnan(S_groundtruth_0);
         % take into account that for different direction of u, the expecteds
         % result changes if u is parallel to cylinder axis or sides
-        Skol_groundtruth_W_alt(1:3,1) = Skol_groundtruth_W(1:3,1)-ug_W*Skol_groundtruth_W(2,2);
-        Skol_groundtruth_W_alt(1:3,2) = Skol_groundtruth_W(1:3,2);
-        assert(all(abs(S_tmp(ind) - Skol_groundtruth_W(ind)) < testtol, [1 2]) || ...
-               all(abs(S_tmp(ind) - Skol_groundtruth_W_alt(ind)) < testtol, [1 2]), ...
+        assert(all(abs(S_tmp(ind) - Skol_groundtruth_W(ind)) < testtol, [1 2]), ...
           'Händisch bestimmter nächster Punkt stimmt nicht mit Berechnung überein: \n[%s]\n vs \n[%s]\nAbweichung : %e', ...
           disp_array(Skol_groundtruth_W, '%1.3f'), disp_array(S_tmp, '%1.3f'), ...
-          min(max(abs(S_tmp(ind) - Skol_groundtruth_W(ind)),[],'all'), ...
-              max(abs(S_tmp(ind) - Skol_groundtruth_W_alt(ind)),[],'all')));
+          min(max(abs(S_tmp(ind) - Skol_groundtruth_W(ind)),[],'all')));
       end
       % Prüfung gegen Ausgabe der mex-Funktion
       S_tmp2 = find_intersection_line_cylinder_mex(rg_W, ug_W, cyl_W(1:3)', ...
         cyl_W(4:6)', cyl_W(7));
       % prüfe auch für getauschte Punkte, da mex-Funktion Ergebnisse in
       % mindestens einem Fall i umgekehter Reihenfolge lieferte
-      S_tmp3 = [S_tmp2(1:3,2) S_tmp2(1:3,1)];
-      assert(all(abs(S_tmp(~isnan(S_tmp(:))) - S_tmp2(~isnan(S_tmp(:)))) < mextol) || ...
-             all(S_tmp(~isnan(S_tmp(:))) - S_tmp3(~isnan(S_tmp(:))) < mextol), ...
+      assert(all(abs(S_tmp(~isnan(S_tmp(:))) - S_tmp2(~isnan(S_tmp(:)))) < mextol), ...
         'Ausgabevariable S_tmp stimmt nicht mit mex-Funktion überein:\n[%s] vs \n[%s]\nAbweichung: %e', ...
         disp_array(S_tmp, '%1.3f'), disp_array(S_tmp2, '%1.3f'), ...
-        min(max(abs(S_tmp(~isnan(S_tmp(:))) - S_tmp2(~isnan(S_tmp(:)))),[],'all'), ...
-            max(abs(S_tmp(~isnan(S_tmp(:))) - S_tmp3(~isnan(S_tmp(:)))),[],'all')));
+        min(max(abs(S_tmp(~isnan(S_tmp(:))) - S_tmp2(~isnan(S_tmp(:)))),[],'all')));
     end
   end
 end
