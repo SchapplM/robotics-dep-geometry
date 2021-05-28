@@ -76,10 +76,10 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
         tt = 'Gerade parallel zu Deckel tangential am Mantel';
       case 9
         ug = [1 0 0]';
-        rg = [0 1 7]';
-        S_groundtruth_0 = [0 1 5; 2 NaN NaN]';
+        rg = [0 1 6]';
+        S_groundtruth_0 = [0 1 5; 1 NaN NaN]';
         intersect_truth = false;
-        tt = 'Gerade parallel zu Deckel tangential am Mantel ausserhalb';
+        tt = 'Gerade parallel zu Deckel tangential am (unendlichen) Mantel ausserhalb';
       case 10
         ug = [1 0 0]';
         rg = [0 0 5+1e-11]';
@@ -100,28 +100,28 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
         tt = 'Gerade parallel zu Deckel fast tangential am Mantel';
       case 13
         ug = [1 0 0]';
-        rg = [0 1+1e-11 7]';
-        S_groundtruth_0 = [0 1 5; 2 NaN NaN]';
+        rg = [0 1+1e-11 6]';
+        S_groundtruth_0 = [0 1 5; 1 NaN NaN]';
         intersect_truth = false;
-        tt = 'Gerade parallel zu Deckel fast tangential am Mantel ausserhalb';
+        tt = 'Gerade parallel zu Deckel fast tangential am (unendlichen) Mantel ausserhalb';
       case 14
         ug = [1 0 0]';
         rg = [0 0 6]';
         S_groundtruth_0 = [-1 0 5; 1 2 NaN]';
         intersect_truth = false;
-        tt = 'Gerade parallel zu Deckel, über Deckel, Abstand Zylinderachse < r';
+        tt = 'Gerade parallel zu Deckel, jenseits Deckel, Abstand Zylinderachse < r';
       case 15
-        ug = [1 0 0]';
-        rg = [0 2 2]';
-        S_groundtruth_0 = [0 1 2; 1 NaN NaN]';
-        intersect_truth = false;
-        tt = 'Gerade parallel zu Deckel, über Deckel, Abstand Zylinderachse > r';
-      case 16
         ug = [1 0 0]';
         rg = [0 2 6]';
         S_groundtruth_0 = [0 1 5; sqrt(2) NaN NaN]';
         intersect_truth = false;
-        tt = 'Gerade parallel zu Deckel aussen vorbei, Abstand Zylinderachse > r';
+        tt = 'Gerade parallel zu Deckel, jenseits Deckel, Abstand Zylinderachse > r';
+      case 16
+        ug = [1 0 0]';
+        rg = [0 2 2]';
+        S_groundtruth_0 = [0 1 2; 1 NaN NaN]';
+        intersect_truth = false;
+        tt = 'Gerade parallel zu Deckel aussen vorbei';
       case 17
         ug = [1 0 1]';
         rg = [0 0 2]';
@@ -145,19 +145,19 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
         rg = [1 0 5]';
         S_groundtruth_0 = [1 0 5; -1 0 3]';
         intersect_truth = true;
-        tt = 'Gerade windschief Schnitt Kante und Mantel';
+        tt = 'Gerade windschief Schnitt Rand und Mantel';
       case 21
         ug = [1 0 5]';
         rg = [1 0 5]';
         S_groundtruth_0 = [1 0 5; 0 0 0]';
         intersect_truth = true;
-        tt = 'Gerade windschief Schnitt Kante und Deckel';
+        tt = 'Gerade windschief Schnitt Rand und Deckel';
       case 22
         ug = [1 0 5/2]';
         rg = [1 0 5]';
         S_groundtruth_0 = [1 0 5; -1 0 0]';
         intersect_truth = true;
-        tt = 'Gerade windschief Schnitt 2x Kante';
+        tt = 'Gerade windschief Schnitt 2x Rand';
       case 23
         ug = [1 0 1]';
         rg = [0 1 2]';
@@ -169,13 +169,13 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
         rg = [0 1 5]';
         S_groundtruth_0 = [0 1 5; 0 1 5]';
         intersect_truth = true;
-        tt = 'Gerade windschief tangential am Deckel ohne Zylinderschnitt ausserhalb';
+        tt = 'Gerade windschief tangential am Rand ohne Zylinderschnitt ausserhalb';
       case 25
         ug = [1 0 1]';
         rg = [-1 0 5]';
         S_groundtruth_0 = [-1 0 5; -1 0 5]';
         intersect_truth = true;
-        tt = 'Gerade windschief tangential am Deckel mit Zylinderschnitt ausserhalb';
+        tt = 'Gerade windschief tangential am Rand mit Zylinderschnitt ausserhalb';
       case 26
         ug = [1 0 1]';
         rg = [0 1 7]';
@@ -193,13 +193,13 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
         rg = [0 1+1e-11 5]';
         S_groundtruth_0 = [0 1 5; 0 1 5]';
         intersect_truth = true;
-        tt = 'Gerade windschief fast tangential am Deckel ohne Zylinderschnitt ausserhalb';
+        tt = 'Gerade windschief fast tangential am Rand ohne Zylinderschnitt ausserhalb';
       case 29
         ug = [1 0 1]';
         rg = [-1-1e-11 0 5]';
         S_groundtruth_0 = [-1 0 5; -1 0 5]';
         intersect_truth = true;
-        tt = 'Gerade windschief fast tangential am Deckel mit Zylinderschnitt ausserhalb';
+        tt = 'Gerade windschief fast tangential am Rand mit Zylinderschnitt ausserhalb';
       case 30
         ug = [1 0 1]';
         rg = [0 1+1e-11 7]';
@@ -217,7 +217,7 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
         rg = [0 0 7]';
         S_groundtruth_0 = [-1 0 5; 0.5*sqrt(2) NaN NaN]';
         intersect_truth = false;
-        tt = 'Gerade windschief aussen vorbei über Deckel';
+        tt = 'Gerade windschief jenseits Deckel, Abstand Zylinderachse < r';
       case 33
         ug = [1 0 1]';
         rg = [0 2 7]';
@@ -225,7 +225,7 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
         % berechnet)
         S_groundtruth_0 = [-0.535357036395672 0.844625860118930 5; 1.551605268270173 NaN NaN]';
         intersect_truth = false;
-        tt = 'Gerade windschief aussen vorbei nicht über Deckel';
+        tt = 'Gerade windschief jenseits Deckel, Abstand Zylinderachse > r';
     end
     if j == 2 || j == 4
       ug = -ug;
