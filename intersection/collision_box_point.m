@@ -106,7 +106,7 @@ for i = 1:6 %#ok<UNRCH>
   center_from_edges = mean(edges_i(:,1:3)+0.5*edges_i(:,4:6));
   test_center = center_from_edges-center_from_corner;
   if any(abs(test_center) > 1e-10)
-    warning('Mittelpunkt Fläche %d stimmt nicht', i);
+    warning('Center of box face %d does not match', i);
   end
 end
 
