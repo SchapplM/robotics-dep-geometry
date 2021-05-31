@@ -85,7 +85,11 @@ function pts = find_intersection_line_cylinder(p, u, p1, p2, r)
       pts = correct_pts(pts, u);
       return;
     else % Schnittpunkte auf beiden Zylinderflächen
-      pts = [p1+r1 p2+r1];
+      if u.'*v < 0 % u entgegen v, auftreffpunkt auf Seite von p2
+        pts = [p2+r1 p1+r1];
+      else % u in richtung v, Auftreffpunkt auf Seite von p1
+        pts = [p1+r1 p2+r1];
+      end
       return;
     end
   end

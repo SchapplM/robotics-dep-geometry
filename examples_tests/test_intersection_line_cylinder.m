@@ -1,7 +1,4 @@
 % Teste Funktionen für Kollisionsprüfung von Zylinder und Gerade
-% 
-% Ergebnis:
-% * Fehler der Funktion find_intersection_line_cylinder in Grenzfall.
 
 % Moritz Schappler, moritz.schappler@imes.uni-hannover.de, 2021-02
 % (C) Institut für Mechatronische Systeme, Leibniz Universität Hannover
@@ -143,19 +140,19 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
       case 20
         ug = [1 0 1]';
         rg = [1 0 5]';
-        S_groundtruth_0 = [1 0 5; -1 0 3]';
+        S_groundtruth_0 = [-1 0 3; 1 0 5]';
         intersect_truth = true;
         tt = 'Gerade windschief Schnitt Rand und Mantel';
       case 21
         ug = [1 0 5]';
         rg = [1 0 5]';
-        S_groundtruth_0 = [1 0 5; 0 0 0]';
+        S_groundtruth_0 = [0 0 0; 1 0 5]';
         intersect_truth = true;
         tt = 'Gerade windschief Schnitt Rand und Deckel';
       case 22
         ug = [1 0 5/2]';
         rg = [1 0 5]';
-        S_groundtruth_0 = [1 0 5; -1 0 0]';
+        S_groundtruth_0 = [-1 0 0; 1 0 5]';
         intersect_truth = true;
         tt = 'Gerade windschief Schnitt 2x Rand';
       case 23
@@ -258,9 +255,6 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
       ug_W = T_W_0(1:3,1:3)*ug;
       %% Schnitt berechnen
       S_tmp = find_intersection_line_cylinder(rg_W, ug_W, cyl_W(1:3)', cyl_W(4:6)', cyl_W(7));
-      if sum(abs(S_tmp-Skol_groundtruth_W), [1 2]) > sum(abs(S_tmp-Skol_groundtruth_W(:,[2 1])), [1 2])
-        Skol_groundtruth_W = Skol_groundtruth_W(:,[2 1]);
-      end
       pt1 = S_tmp(:,1);
       pt2 = S_tmp(:,2);
       if any(isnan(S_tmp(:,2)))
