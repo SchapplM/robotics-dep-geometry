@@ -125,7 +125,7 @@ function [d_min, p_c] = check_edge(e, ui, cuiu, cucuiu,p,p_c,d_min)
   end
 end
 
-% Hilfsfunktion zur Korrektur von Zylinderschnittpunkten die nur numerisch
+% Hilfsfunktion zur Korrektur von Quaderschnittpunkten die nur numerisch
 % außerhalb des Zylinders liegen (d<1e-10)
 function pts_out = correct_pts(pts_in)
   if isnan(pts_in(3,2)) && pts_in(1,2)<1e-10
