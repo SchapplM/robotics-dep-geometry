@@ -44,58 +44,232 @@ function pts = find_intersection_line_box(p, u, q, u1, u2, u3)
   assert(isa(u3,'double') && isreal(u3) && all(size(u3) == [3 1]), ...
     'find_intersection_line_box: u3 has to be [3x1] double');  
   
+  u1_parallel = norm(u1.'*u)/(norm(u1)*norm(u)) < 1e-10;
+  u2_parallel = norm(u2.'*u)/(norm(u2)*norm(u)) < 1e-10;
+  u3_parallel = norm(u3.'*u)/(norm(u3)*norm(u)) < 1e-10;
   R_inv = [u1, u2, u3];
   R     = diag([1/(u1.'*u1), 1/(u2.'*u2), 1/(u3.'*u3)])*R_inv.';
   pt    = R*(p-q);
   ut    = R*u;
   t     = NaN(1,6);
-  t(1)  = -pt(1)/ut(1); % Ebene x=0
-  t(2)  = -pt(2)/ut(2); % Ebene y=0
-  t(3)  = -pt(3)/ut(3); % Ebene z=0
-  t(4)  = (1-pt(1))/ut(1); % Ebene x=1
-  t(5)  = (1-pt(2))/ut(2); % Ebene y=1
-  t(6)  = (1-pt(3))/ut(3); % Ebene z=1
-  t2    = sort(t(~isnan(t) & ~isinf(t)));
+  if ~u1_parallel
+    t(1)  = -pt(1)/ut(1); % Ebene x=0
+    t(4)  = (1-pt(1))/ut(1); % Ebene x=1
+  end
+  if ~u2_parallel
+    t(2)  = -pt(2)/ut(2); % Ebene y=0
+    t(5)  = (1-pt(2))/ut(2); % Ebene y=1
+  end
+  if ~u3_parallel
+    t(3)  = -pt(3)/ut(3); % Ebene z=0
+    t(6)  = (1-pt(3))/ut(3); % Ebene z=1
+  end
+  [t2, ind_t2] = sort(t(~isnan(t) & ~isinf(t)));
   
 
   i_krit = length(t2)/2;
-  if (any(pt+t2(i_krit)*ut>1+1e-10) || any(pt+t2(i_krit)*ut<-1e-10) || any(pt+t2(i_krit+1)*ut>1+1e-10) || any(pt+t2(i_krit+1)*ut<-1e-10)) % keine Schnittpunkte
+  p_krit1 = pt+t2(i_krit)*ut;
+  if any(p_krit1>1+1e-10) || any(p_krit1<-1e-10) % keine Schnittpunkte
     % Finde nächsten Punkt zu den Zwölf Kanten und den 8 Ecken und nehme
     % das Minimum (bei den Kanten muss die Korrektheit geprüft werden, also
     % ob der Punkt auf der Kante liegt). Für die Ecken berechnen wir den
     % Abstand zur geraden mit d=|(e-p) x u|/|u|, für die Kanten e+ui*t mit
     % d=|(e-p)*(u x ui)|/|u x ui|.
-    d_min = norm(cross(p-q,u))/norm(u);
-    p_c = q;
-    [d_min, p_c] = check_corner(q+u1,p,u,p_c,d_min);
-    [d_min, p_c] = check_corner(q+u2,p,u,p_c,d_min);
-    [d_min, p_c] = check_corner(q+u3,p,u,p_c,d_min);
-    [d_min, p_c] = check_corner(q+u1+u2,p,u,p_c,d_min);
-    [d_min, p_c] = check_corner(q+u2+u3,p,u,p_c,d_min);
-    [d_min, p_c] = check_corner(q+u3+u1,p,u,p_c,d_min);
-    [d_min, p_c] = check_corner(q+u1+u2+u3,p,u,p_c,d_min);
-    cu1u = cross(u1,u);
-    cu2u = cross(u2,u);
-    cu3u = cross(u3,u);
-    cucu1u = cross(u,cu1u);
-    cucu2u = cross(u,cu2u);
-    cucu3u = cross(u,cu3u);
-    [d_min, p_c] = check_edge(q, u1, cu1u, cucu1u,p,p_c,d_min);
-    [d_min, p_c] = check_edge(q+u2, u1, cu1u, cucu1u,p,p_c,d_min);
-    [d_min, p_c] = check_edge(q+u3, u1, cu1u, cucu1u,p,p_c,d_min);
-    [d_min, p_c] = check_edge(q+u2+u3, u1, cu1u, cucu1u,p,p_c,d_min);
-    [d_min, p_c] = check_edge(q, u2, cu2u, cucu2u,p,p_c,d_min);
-    [d_min, p_c] = check_edge(q+u1, u2, cu2u, cucu2u,p,p_c,d_min);
-    [d_min, p_c] = check_edge(q+u3, u2, cu2u, cucu2u,p,p_c,d_min);
-    [d_min, p_c] = check_edge(q+u1+u3, u2, cu2u, cucu2u,p,p_c,d_min);
-    [d_min, p_c] = check_edge(q, u3, cu3u, cucu3u,p,p_c,d_min);
-    [d_min, p_c] = check_edge(q+u1, u3, cu3u, cucu3u,p,p_c,d_min);
-    [d_min, p_c] = check_edge(q+u2, u3, cu3u, cucu3u,p,p_c,d_min);
-    [d_min, p_c] = check_edge(q+u1+u2, u3, cu3u, cucu3u,p,p_c,d_min);
-    pts = [p_c, [norm(cross(p_c-p,u))/norm(u); NaN(2,1)]];
-    pts = correct_pts(pts);
+    if i_krit==1 % g parallel to two sides
+      p_c = p_krit1;
+      d_square = 0;
+      if u1_parallel
+        d_square = d_square + (max(min(p_c(1),0),p_c(1)-1)*norm(u1))^2;
+        p_c(1) = min(1,max(0,p_c(1)));
+      end
+      if u2_parallel
+        d_square = d_square + (max(min(p_c(2),0),p_c(2)-1)*norm(u2))^2;
+        p_c(2) = min(1,max(0,p_c(2)));
+      end
+      if u3_parallel
+        d_square = d_square + (max(min(p_c(3),0),p_c(3)-1)*norm(u3))^2;
+        p_c(3) = min(1,max(0,p_c(3)));
+      end
+      p_krit2 = pt+t2(i_krit+1)*ut;
+      pts = [q+R_inv*p_c, [sqrt(d_square); norm(R_inv*p_krit1 - R_inv*p_krit2); NaN]];
+      pts = correct_pts(pts);
+    elseif u1_parallel % g parallel to u1=const side only
+      p_c = p_krit1([2 3]);
+      if any(p_c>1+1e-10) || any(p_c<-1e-10) % nicht über Seite
+        if p_krit1(1)>=1
+          p_c = q+u1;
+        elseif p_krit1(1)<=0
+          p_c = q;
+        else
+          p_c = p_krit1;
+          switch ind_t2(3)
+            case 1 % y=0
+              p_c(2) = 0;
+            case 2 % y=1
+              p_c(2) = 1;
+            case 3 % z=0
+              p_c(3) = 0;
+            case 4 % z=1
+              p_c(3) = 1;
+          end
+          p_c = q+R_inv*p_c;
+          d = norm(cross(p_c-p,u))/norm(u);
+          pts = [p_c, [d; NaN; NaN]];
+          pts = correct_pts(pts);
+          return;
+        end
+        switch ind_t2(2)*ind_t2(3)
+          case 3 % y=0,z=0
+          case 4 % y=0,z=1
+            p_c = p_c + u3;
+          case 6 % y=1,z=0
+            p_c = p_c + u2;
+          case 8 % y=1,z=1
+            p_c = p_c + u2 + u3;
+          otherwise
+            error(['Error, line parallel to one side intersects opposite '...
+                   'sides after another.']);
+        end
+        d = norm(cross(p_c-p,u))/norm(u);
+        pts = [p_c, [d; NaN; NaN]];
+        pts = correct_pts(pts);
+      else
+        p_c = p_krit1;
+        p_krit2 = pt+t2(i_krit+1)*ut;
+        d = abs(max(min(p_c(1),0),p_c(1)-1))*norm(u1);
+        p_c(1) = min(1,max(0,p_c(1)));
+        pts = [q+R_inv*p_c, [d; norm(R_inv*p_krit1 - R_inv*p_krit2); NaN]];
+        pts = correct_pts(pts);
+      end
+    elseif u2_parallel % g parallel to u2=const side only
+      p_c = p_krit1([1 3]);
+      if any(p_c>1+1e-10) || any(p_c<-1e-10) % nicht über Seite
+        if p_krit1(2)>=1
+          p_c = q+u2;
+        elseif p_krit1(2)<=0
+          p_c = q;
+        else
+          p_c = p_krit1;
+          switch ind_t2(3)
+            case 1 % x=0
+              p_c(1) = 0;
+            case 2 % x=1
+              p_c(1) = 1;
+            case 3 % z=0
+              p_c(3) = 0;
+            case 4 % z=1
+              p_c(3) = 1;
+          end
+          p_c = q+R_inv*p_c;
+          d = norm(cross(p_c-p,u))/norm(u);
+          pts = [p_c, [d; NaN; NaN]];
+          pts = correct_pts(pts);
+          return;
+        end
+        switch ind_t2(2)*ind_t2(3)
+          case 3 % x=0,z=0
+          case 4 % x=0,z=1
+            p_c = p_c + u3;
+          case 6 % x=1,z=0
+            p_c = p_c + u1;
+          case 8 % x=1,z=1
+            p_c = p_c + u1 + u3;
+          otherwise
+            error(['Error, line parallel to one side intersects opposite '...
+                   'sides after another.']);
+        end
+        d = norm(cross(p_c-p,u))/norm(u);
+        pts = [p_c, [d; NaN; NaN]];
+        pts = correct_pts(pts);
+      else
+        p_c = p_krit1;
+        p_krit2 = pt+t2(i_krit+1)*ut;
+        d = abs(max(min(p_c(2),0),p_c(2)-1))*norm(u2);
+        p_c(2) = min(1,max(0,p_c(2)));
+        pts = [q+R_inv*p_c, [d; norm(R_inv*p_krit1 - R_inv*p_krit2); NaN]];
+        pts = correct_pts(pts);
+      end
+    elseif u3_parallel % g parallel to u3=const side only
+      p_c = p_krit1([1 2]);
+      if any(p_c>1+1e-10) || any(p_c<-1e-10) % nicht über Seite
+        if p_krit1(3)>=1
+          p_c = q+u3;
+        elseif p_krit1(3)<=0
+          p_c = q;
+        else
+          p_c = p_krit1;
+          switch ind_t2(3)
+            case 1 % x=0
+              p_c(1) = 0;
+            case 2 % x=1
+              p_c(1) = 1;
+            case 3 % y=0
+              p_c(2) = 0;
+            case 4 % y=1
+              p_c(2) = 1;
+          end
+          p_c = q+R_inv*p_c;
+          d = norm(cross(p_c-p,u))/norm(u);
+          pts = [p_c, [d; NaN; NaN]];
+          pts = correct_pts(pts);
+          return;
+        end
+        switch ind_t2(2)*ind_t2(3)
+          case 3 % x=0,y=0
+          case 4 % x=0,y=1
+            p_c = p_c + u2;
+          case 6 % x=1,y=0
+            p_c = p_c + u1;
+          case 8 % x=1,y=1
+            p_c = p_c + u1 + u2;
+          otherwise
+            error(['Error, line parallel to one side intersects opposite '...
+                   'sides after another.']);
+        end
+        d = norm(cross(p_c-p,u))/norm(u);
+        pts = [p_c, [d; NaN; NaN]];
+        pts = correct_pts(pts);
+      else
+        p_c = p_krit1;
+        p_krit2 = pt+t2(i_krit+1)*ut;
+        d = abs(max(min(p_c(3),0),p_c(3)-1))*norm(u3);
+        p_c(3) = min(1,max(0,p_c(3)));
+        pts = [q+R_inv*p_c, [d; norm(R_inv*p_krit1 - R_inv*p_krit2); NaN]];
+        pts = correct_pts(pts);
+      end
+    else
+      d_min = norm(cross(p-q,u))/norm(u);
+      p_c = q;
+      [d_min, p_c] = check_corner(q+u1,p,u,p_c,d_min);
+      [d_min, p_c] = check_corner(q+u2,p,u,p_c,d_min);
+      [d_min, p_c] = check_corner(q+u3,p,u,p_c,d_min);
+      [d_min, p_c] = check_corner(q+u1+u2,p,u,p_c,d_min);
+      [d_min, p_c] = check_corner(q+u2+u3,p,u,p_c,d_min);
+      [d_min, p_c] = check_corner(q+u3+u1,p,u,p_c,d_min);
+      [d_min, p_c] = check_corner(q+u1+u2+u3,p,u,p_c,d_min);
+      cu1u = cross(u1,u);
+      cu2u = cross(u2,u);
+      cu3u = cross(u3,u);
+      cucu1u = cross(u,cu1u);
+      cucu2u = cross(u,cu2u);
+      cucu3u = cross(u,cu3u);
+      [d_min, p_c] = check_edge(q, u1, cu1u, cucu1u,p,p_c,d_min);
+      [d_min, p_c] = check_edge(q+u2, u1, cu1u, cucu1u,p,p_c,d_min);
+      [d_min, p_c] = check_edge(q+u3, u1, cu1u, cucu1u,p,p_c,d_min);
+      [d_min, p_c] = check_edge(q+u2+u3, u1, cu1u, cucu1u,p,p_c,d_min);
+      [d_min, p_c] = check_edge(q, u2, cu2u, cucu2u,p,p_c,d_min);
+      [d_min, p_c] = check_edge(q+u1, u2, cu2u, cucu2u,p,p_c,d_min);
+      [d_min, p_c] = check_edge(q+u3, u2, cu2u, cucu2u,p,p_c,d_min);
+      [d_min, p_c] = check_edge(q+u1+u3, u2, cu2u, cucu2u,p,p_c,d_min);
+      [d_min, p_c] = check_edge(q, u3, cu3u, cucu3u,p,p_c,d_min);
+      [d_min, p_c] = check_edge(q+u1, u3, cu3u, cucu3u,p,p_c,d_min);
+      [d_min, p_c] = check_edge(q+u2, u3, cu3u, cucu3u,p,p_c,d_min);
+      [~, p_c] = check_edge(q+u1+u2, u3, cu3u, cucu3u,p,p_c,d_min);
+      pts = [p_c, [norm(cross(p_c-p,u))/norm(u); NaN(2,1)]];
+      pts = correct_pts(pts);
+    end
   else
-    pts = [q+R_inv*(pt+t2(i_krit)*ut), q+R_inv*(pt+t2(i_krit+1)*ut)];
+    pts = [q+R_inv*p_krit1, q+R_inv*(pt+t2(i_krit+1)*ut)];
   end
 end
   

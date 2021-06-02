@@ -47,16 +47,14 @@ for i = 1:47 % Schleife über manuelle Testszenarien
       tt = 'Gerade parallel zu 2 Seitenpaaren fast tangential an Kante';
     case 6
       ug = [0 0 1]';
-      rg = [0 3 0]';
-%       S_groundtruth_0 = [0 2 0; 1 3 NaN]';
-      S_groundtruth_0 = [0 2 0; 1 NaN NaN]';
+      rg = [0.5 3 0]';
+      S_groundtruth_0 = [0.5 2 0; 1 3 NaN]';
       intersect_truth = false;
       tt = 'Gerade parallel zu 2 Seitenpaaren ohne Schnitt drüber';
     case 7
       ug = [0 0 1]';
       rg = [2 3 0]';
-%       S_groundtruth_0 = [1 2 0; sqrt(2) 3 NaN]';
-      S_groundtruth_0 = [1 2 0; sqrt(2) NaN NaN]';
+      S_groundtruth_0 = [1 2 0; sqrt(2) 3 NaN]';
       intersect_truth = false;
       tt = 'Gerade parallel zu 2 Seitenpaaren ohne Schnitt vorbei';
     case 8
@@ -158,47 +156,43 @@ for i = 1:47 % Schleife über manuelle Testszenarien
     case 24
       ug = [0 1 4]';
       rg = [2 1/4 0]';
-%       S_groundtruth_0 = [1 1/4 0; 1 3/4*sqrt(17) NaN]';
-      S_groundtruth_0 = [1 1/4 0; 1 NaN NaN]';
+      S_groundtruth_0 = [1 1/4 0; 1 3/4*sqrt(17) NaN]';
       intersect_truth = false;
       tt = 'Gerade parallel zu einem Seitenpaar, vorbei, drüber über Kante ggü. Kante';
     case 25
       ug = [0 1 1]';
       rg = [2 1 0]';
-%       S_groundtruth_0 = [1 1 0; 1 sqrt(2) NaN]';
-      S_groundtruth_0 = [1 1 0; 1 NaN NaN]';
+      S_groundtruth_0 = [1 1 0; 1 sqrt(2) NaN]';
       intersect_truth = false;
       tt = 'Gerade parallel zu einem Seitenpaar, vorbei, drüber über benachbarte Kanten';
     case 26
       ug = [0 1 1]';
       rg = [2 0 0]';
-%       S_groundtruth_0 = [1 0 0; 1 2*sqrt(2) NaN]';
-      S_groundtruth_0 = [1 0 0; 1 NaN NaN]';
+      S_groundtruth_0 = [1 0 0; 1 2*sqrt(2) NaN]';
       intersect_truth = false;
       tt = 'Gerade parallel zu einem Seitenpaar, vorbei, drüber über Ecke, ggü. Kante';
     case 27
       ug = [0 2 3]';
       rg = [2 0 0]';
-%       S_groundtruth_0 = [1 0 0; 1 sqrt(13) NaN]';
-      S_groundtruth_0 = [1 0 0; 1 NaN NaN]';
+      S_groundtruth_0 = [1 0 0; 1 sqrt(13) NaN]';
       intersect_truth = false;
       tt = 'Gerade parallel zu einem Seitenpaar, vorbei, drüber über ggü. Ecken';
     case 28
       ug = [0 1 1]';
-      rg = [2 2 3]';
-      S_groundtruth_0 = [1 2 3; 1 NaN NaN]';
+      rg = [2 0 3]';
+      S_groundtruth_0 = [1 0 3; 1 NaN NaN]';
       intersect_truth = false;
       tt = 'Gerade parallel zu einem Seitenpaar, vorbei, tangential an Kantenverlängerung';
     case 29
       ug = [0 1 1]';
-      rg = [2 2+1e-11 3+1e-11]';
-      S_groundtruth_0 = [1 2 3; 1 NaN NaN]';
+      rg = [2 0-1e-11 3+1e-11]';
+      S_groundtruth_0 = [1 0 3; 1 NaN NaN]';
       intersect_truth = false;
       tt = 'Gerade parallel zu einem Seitenpaar, vorbei, fast tangential an Kantenverlängerung';
     case 30
       ug = [1 0 1]';
-      rg = [2 3 3]';
-      S_groundtruth_0 = [0 2 1; 1 NaN NaN]';
+      rg = [2 3 6]';
+      S_groundtruth_0 = [0 2 3; sqrt(3/2) NaN NaN]';
       intersect_truth = false;
       tt = 'Gerade parallel zu einem Seitenpaar, aussen vorbei';
     case 31
@@ -304,7 +298,7 @@ for i = 1:47 % Schleife über manuelle Testszenarien
       intersect_truth = false;
       tt = 'Gerade windschief, aussen vorbei';
   end
-  for j=1:2
+  for j=1:1%2
     if j==2 % change direction of ug
       ug = -ug;
       % Bei umgedrehter Richtung von u wird auch das ergebnis anders herum sein
@@ -316,7 +310,7 @@ for i = 1:47 % Schleife über manuelle Testszenarien
     end
     q = [0;0;0];
     u = [1 0 0;0 2 0;0 0 3];
-    for k=0:7 % use all corners as base
+    for k=0:0%7 % use all corners as base
       if mod(k,2)
         q = q + u(:,1);
         u(:,1) = -u(:,1);
@@ -329,8 +323,8 @@ for i = 1:47 % Schleife über manuelle Testszenarien
         q = q + u(:,3);
         u(:,3) = -u(:,3);
       end
-      for l=perms(1:3)' % use all possible combinations of directions
-        for m = 1:3 % zufällige Transformation aller Punkte
+      for l=[1 2 3]%perms(1:3)' % use all possible combinations of directions
+        for m = 1:1%3 % zufällige Transformation aller Punkte
           %% Transformation
           if m == 1 % keine Transformation
             T_W_0 = eye(4);
@@ -362,7 +356,7 @@ for i = 1:47 % Schleife über manuelle Testszenarien
           end
           %% Zeichnen
           change_current_figure(i);clf; hold on;
-          cubpar_c = q+(u_W(:,1)+u_W(:,2)+u_W(:,3))/2; % Mittelpunkt des Quaders
+          cubpar_c = q_W+(u_W(:,1)+u_W(:,2)+u_W(:,3))/2; % Mittelpunkt des Quaders
           cubpar_l = [norm(u_W(:,1)); norm(u_W(:,2)); norm(u_W(:,3))]; % Dimension des Quaders
           cubpar_a = 180/pi*r2eulzyx([u_W(:,1)/norm(u_W(:,1)), u_W(:,2)/norm(u_W(:,2)), u_W(:,3)/norm(u_W(:,3))]); % Orientierung des Quaders
           drawCuboid([cubpar_c', cubpar_l', cubpar_a'], 'FaceColor', 'b', 'FaceAlpha', 0.3);
@@ -378,8 +372,8 @@ for i = 1:47 % Schleife über manuelle Testszenarien
           view(3); grid on; axis equal;
           title(sprintf('Fall %d: %s. Abstand: %1.2f', i, tt, dist));
           mm = minmax2([pt1';pt2';Skol_groundtruth_W(1:3,1)';Skol_groundtruth_W(1:3,2)';...
-                        q_W'; q_W'+u(:,1)'; q_W'+u(:,2)'; q_W'+u(:,3)'; q_W'+u(:,1)'+u(:,2)';...
-                        q_W'+u(:,1)'+u(:,3)'; q_W'+u(:,2)'+u(:,3)'; q_W'+u(:,1)'+u(:,2)'+u(:,3)';]');
+                        q_W'; q_W'+u_W(:,1)'; q_W'+u_W(:,2)'; q_W'+u_W(:,3)'; q_W'+u_W(:,1)'+u_W(:,2)';...
+                        q_W'+u_W(:,1)'+u_W(:,3)'; q_W'+u_W(:,2)'+u_W(:,3)'; q_W'+u_W(:,1)'+u_W(:,2)'+u_W(:,3)';]');
           lambda_min = (-2 + mm(:,1) - rg_W)./ug_W;
           lambda_max = (2 + mm(:,2) - rg_W)./ug_W;
           lambda = sort([lambda_min;lambda_max]);
