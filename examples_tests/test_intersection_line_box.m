@@ -298,7 +298,7 @@ for i = 1:47 % Schleife über manuelle Testszenarien
       intersect_truth = false;
       tt = 'Gerade windschief, aussen vorbei';
   end
-  for j=1:1%2
+  for j=1:2
     if j==2 % change direction of ug
       ug = -ug;
       % Bei umgedrehter Richtung von u wird auch das ergebnis anders herum sein
@@ -310,7 +310,7 @@ for i = 1:47 % Schleife über manuelle Testszenarien
     end
     q = [0;0;0];
     u = [1 0 0;0 2 0;0 0 3];
-    for k=0:0%7 % use all corners as base
+    for k=0:7 % use all corners as base
       if mod(k,2)
         q = q + u(:,1);
         u(:,1) = -u(:,1);
@@ -323,8 +323,9 @@ for i = 1:47 % Schleife über manuelle Testszenarien
         q = q + u(:,3);
         u(:,3) = -u(:,3);
       end
-      for l=[1 2 3]%perms(1:3)' % use all possible combinations of directions
-        for m = 1:1%3 % zufällige Transformation aller Punkte
+      for l=perms(1:3)' % use all possible combinations of directions
+        u = u(:,l);
+        for m = 1:3 % zufällige Transformation aller Punkte
           %% Transformation
           if m == 1 % keine Transformation
             T_W_0 = eye(4);
@@ -358,7 +359,11 @@ for i = 1:47 % Schleife über manuelle Testszenarien
           change_current_figure(i);clf; hold on;
           cubpar_c = q_W+(u_W(:,1)+u_W(:,2)+u_W(:,3))/2; % Mittelpunkt des Quaders
           cubpar_l = [norm(u_W(:,1)); norm(u_W(:,2)); norm(u_W(:,3))]; % Dimension des Quaders
-          cubpar_a = 180/pi*r2eulzyx([u_W(:,1)/norm(u_W(:,1)), u_W(:,2)/norm(u_W(:,2)), u_W(:,3)/norm(u_W(:,3))]); % Orientierung des Quaders
+          R = [u_W(:,1)/norm(u_W(:,1)), u_W(:,2)/norm(u_W(:,2)), u_W(:,3)/norm(u_W(:,3))];
+          cubpar_a = 180/pi*r2eulzyx(R); % Orientierung des Quaders
+          if abs(abs(cubpar_a(2))-90)<1e-10 % Singularität
+            cubpar_a(1) = -180/pi*atan2(R(1,2),R(2,2));
+          end
           drawCuboid([cubpar_c', cubpar_l', cubpar_a'], 'FaceColor', 'b', 'FaceAlpha', 0.3);
           plot3(pt1(1), pt1(2), pt1(3), 'kx', 'MarkerSize', 10, 'LineWidth', 3);
           plot3(pt2(1), pt2(2), pt2(3), 'r+', 'MarkerSize', 12, 'LineWidth', 3);

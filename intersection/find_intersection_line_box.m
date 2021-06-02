@@ -54,14 +54,14 @@ function pts = find_intersection_line_box(p, u, q, u1, u2, u3)
   t     = NaN(1,6);
   if ~u1_parallel
     t(1)  = -pt(1)/ut(1); % Ebene x=0
-    t(4)  = (1-pt(1))/ut(1); % Ebene x=1
+    t(2)  = (1-pt(1))/ut(1); % Ebene x=1
   end
   if ~u2_parallel
-    t(2)  = -pt(2)/ut(2); % Ebene y=0
-    t(5)  = (1-pt(2))/ut(2); % Ebene y=1
+    t(3)  = -pt(2)/ut(2); % Ebene y=0
+    t(4)  = (1-pt(2))/ut(2); % Ebene y=1
   end
   if ~u3_parallel
-    t(3)  = -pt(3)/ut(3); % Ebene z=0
+    t(5)  = -pt(3)/ut(3); % Ebene z=0
     t(6)  = (1-pt(3))/ut(3); % Ebene z=1
   end
   [t2, ind_t2] = sort(t(~isnan(t) & ~isinf(t)));
@@ -300,10 +300,14 @@ function [d_min, p_c] = check_edge(e, ui, cuiu, cucuiu,p,p_c,d_min)
 end
 
 % Hilfsfunktion zur Korrektur von Quaderschnittpunkten die nur numerisch
-% außerhalb des Zylinders liegen (d<1e-10)
+% außerhalb des Quaders liegen (d<1e-10)
 function pts_out = correct_pts(pts_in)
-  if isnan(pts_in(3,2)) && pts_in(1,2)<1e-10
-    pts_out = [pts_in(1:3,1) pts_in(1:3,1)];
+  if isnan(pts_in(3,2)) && pts_in(1,2) < 1e-10
+    if ~isnan(pts_in(2,2))
+      pts_out = [pts_in(1:3,1) pts_in(1:3,1)+u*pts_in(2,2)];
+    else
+      pts_out = [pts_in(1:3,1) pts_in(1:3,1)];
+    end
   else
     pts_out = pts_in;
   end
