@@ -7,11 +7,12 @@ clc
 clear
 close all;
 rng(0);
+drawmode = 0; % 0 = no draw, 1 = one draw per case, 2 = draw all
 
 % Kompiliere alle Funktionen. Dadurch werden Syntax-Fehler erkannt
 % matlabfcn2mex({'find_intersection_line_box'});
 %% Teste Kollision aus Zylinder und Gerade
-for i = 1:47 % Schleife über manuelle Testszenarien
+for i = 1:48 % Schleife über manuelle Testszenarien
   testtol = 1e-10;
   mextol = 1e-12;
   switch i
@@ -191,107 +192,113 @@ for i = 1:47 % Schleife über manuelle Testszenarien
       tt = 'Gerade parallel zu einem Seitenpaar, vorbei, fast tangential an Kantenverlängerung';
     case 30
       ug = [1 0 1]';
+      rg = [0 1 4]';
+      S_groundtruth_0 = [0 1 3; sqrt(2)/2 NaN NaN]';
+      intersect_truth = false;
+      tt = 'Gerade parallel zu einem Seitenpaar, mittig vorbei';
+    case 31
+      ug = [1 0 1]';
       rg = [2 3 6]';
       S_groundtruth_0 = [0 2 3; sqrt(3/2) NaN NaN]';
       intersect_truth = false;
       tt = 'Gerade parallel zu einem Seitenpaar, aussen vorbei';
-    case 31
+    case 32
       ug = [1 1 1]';
       rg = [0 0.5 1]';
       S_groundtruth_0 = [0 0.5 1; 1 1.5 2]';
       intersect_truth = true;
       tt = 'Gerade windschief, Schnitt ggü. Seiten';
-    case 32
+    case 33
       ug = [1 1 1]';
       rg = [0 1.5 1]';
       S_groundtruth_0 = [0 1.5 1; 0.5 2 1.5]';
       intersect_truth = true;
       tt = 'Gerade windschief, Schnitt benachbarte Seiten';
-    case 33
+    case 34
       ug = [1 1 1]';
       rg = [0 1 1]';
       S_groundtruth_0 = [0 1 1; 1 2 2]';
       intersect_truth = true;
       tt = 'Gerade windschief, Schnitt Seite ggü. Kante';
-    case 34
+    case 35
       ug = [1 1 1]';
       rg = [0 1.5 2.5]';
       S_groundtruth_0 = [0 1.5 2.5; 0.5 2 3]';
       intersect_truth = true;
       tt = 'Gerade windschief, Schnitt Seite benachbarte Kante';
-    case 35
+    case 36
       ug = [1 1 1]';
       rg = [0 1 2]';
       S_groundtruth_0 = [0 1 2; 1 2 3]';
       intersect_truth = true;
       tt = 'Gerade windschief, Schnitt Seite ggü. Ecke';
-    case 36
+    case 37
       ug = [1 2 1]';
       rg = [0 0 1]';
       S_groundtruth_0 = [0 0 1; 1 2 2]';
       intersect_truth = true;
       tt = 'Gerade windschief, Schnitt ggü. Kanten';
-    case 37
+    case 38
       ug = [1 1 1]';
       rg = [0 0 2]';
       S_groundtruth_0 = [0 0 2; 1 1 3]';
       intersect_truth = true;
       tt = 'Gerade windschief, Schnitt diagonale Kanten';
-    case 38
+    case 39
       ug = [1 2 1]';
       rg = [0 0 2]';
       S_groundtruth_0 = [0 0 2; 1 2 3]';
       intersect_truth = true;
       tt = 'Gerade windschief, Schnitt Kante ggü. Ecke';
-    case 39
+    case 40
       ug = [1 2 3]';
       rg = [0 0 0]';
       S_groundtruth_0 = [0 0 0; 1 2 3]';
       intersect_truth = true;
       tt = 'Gerade windschief, Schnitt ggü. Ecken';
-    case 40
+    case 41
       ug = [1 1 1]';
       rg = [0 1 3]';
       S_groundtruth_0 = [0 1 3; 0 1 3]';
       intersect_truth = true;
       tt = 'Gerade windschief, tangential an Kante';
-    case 41
+    case 42
       ug = [1 1 1]';
       rg = [0 0 3]';
       S_groundtruth_0 = [0 0 3; 0 0 3]';
       intersect_truth = true;
       tt = 'Gerade windschief, tangential an Ecke';
-    case 42
+    case 43
       ug = [1 1 1]';
       rg = [0 1+1e-11 3+1e-11]';
       S_groundtruth_0 = [0 1 3; 0 1 3]';
       intersect_truth = true;
       tt = 'Gerade windschief, fast tangential an Kante';
-    case 43
+    case 44
       ug = [1 1 1]';
       rg = [0 0 3+1e-11]';
       S_groundtruth_0 = [0 0 3; 0 0 3]';
       intersect_truth = true;
       tt = 'Gerade windschief, fast tangential an Ecke';
-    case 44
+    case 45
       ug = [1 1 1]';
       rg = [0 0 4]';
       S_groundtruth_0 = [0 0 3; sqrt(2/3) NaN NaN]';
       intersect_truth = false;
       tt = 'Gerade windschief, vorbei über Fläche';
-    case 45
+    case 46
       ug = [1 1 1]';
       rg = [0 2 4]';
       S_groundtruth_0 = [0 1.5 3; 1/sqrt(2) NaN NaN]';
       intersect_truth = false;
       tt = 'Gerade windschief, vorbei Kantenverlängerung tangiert';
-    case 46
+    case 47
       ug = [1 1 1]';
       rg = [0 2+1e-11 4]';
       S_groundtruth_0 = [0 1.5 3; 1/sqrt(2) NaN NaN]';
       intersect_truth = false;
       tt = 'Gerade windschief, vorbei Kantenverlängerung fast tangiert';
-    case 47
+    case 48
       ug = [1 1 1]';
       rg = [2 5 8.5]';
       S_groundtruth_0 = [0 1.25 3; 0.25*sqrt(98) NaN NaN]';
@@ -348,49 +355,51 @@ for i = 1:47 % Schleife über manuelle Testszenarien
           ug_W = T_W_0(1:3,1:3)*ug;
           %% Schnitt berechnen
           S_tmp = find_intersection_line_box(rg_W, ug_W, q_W, u_W(:,1), u_W(:,2), u_W(:,3));
-          pt1 = S_tmp(:,1);
-          pt2 = S_tmp(:,2);
           if any(isnan(S_tmp(:,2)))
             dist = S_tmp(1,2);
           else
             dist = 0;
           end
-          %% Zeichnen
-          change_current_figure(i);clf; hold on;
-          cubpar_c = q_W+(u_W(:,1)+u_W(:,2)+u_W(:,3))/2; % Mittelpunkt des Quaders
-          cubpar_l = [norm(u_W(:,1)); norm(u_W(:,2)); norm(u_W(:,3))]; % Dimension des Quaders
-          R = [u_W(:,1)/norm(u_W(:,1)), u_W(:,2)/norm(u_W(:,2)), u_W(:,3)/norm(u_W(:,3))];
-          cubpar_a = 180/pi*r2eulzyx(R); % Orientierung des Quaders
-          if abs(abs(cubpar_a(2))-90)<1e-10 % Singularität
-            cubpar_a(1) = -180/pi*atan2(R(1,2),R(2,2));
+          if drawmode==2 || (drawmode==1 && j==1 && k==0 && all(l==[3;2;1]) && m==1)
+            %% Zeichnen
+            pt1 = S_tmp(:,1);
+            pt2 = S_tmp(:,2);
+            change_current_figure(i);clf; hold on;
+            cubpar_c = q_W+(u_W(:,1)+u_W(:,2)+u_W(:,3))/2; % Mittelpunkt des Quaders
+            cubpar_l = [norm(u_W(:,1)); norm(u_W(:,2)); norm(u_W(:,3))]; % Dimension des Quaders
+            R = [u_W(:,1)/norm(u_W(:,1)), u_W(:,2)/norm(u_W(:,2)), u_W(:,3)/norm(u_W(:,3))];
+            cubpar_a = 180/pi*r2eulzyx(R); % Orientierung des Quaders
+            if abs(abs(cubpar_a(2))-90)<1e-10 % Singularität
+              cubpar_a(1) = -180/pi*atan2(R(1,2),R(2,2));
+            end
+            drawCuboid([cubpar_c', cubpar_l', cubpar_a'], 'FaceColor', 'b', 'FaceAlpha', 0.3);
+            plot3(pt1(1), pt1(2), pt1(3), 'kx', 'MarkerSize', 10, 'LineWidth', 3);
+            plot3(pt2(1), pt2(2), pt2(3), 'r+', 'MarkerSize', 12, 'LineWidth', 3);
+            plot3([Skol_groundtruth_W(1,1);S_tmp(1,1)], [Skol_groundtruth_W(2,1);S_tmp(2,1)], ...
+                  [Skol_groundtruth_W(3,1);S_tmp(3,1)], '--c', 'MarkerSize', 5, 'LineWidth', 3);
+            if intersect_truth
+              plot3([Skol_groundtruth_W(1,2);S_tmp(1,2)], [Skol_groundtruth_W(2,2);S_tmp(2,2)], ...
+                    [Skol_groundtruth_W(3,2);S_tmp(3,2)], '--c', 'MarkerSize', 5, 'LineWidth', 3);
+            end
+            xlabel('x in m'); ylabel('y in m'); zlabel('z in m');
+            view(3); grid on; axis equal;
+            title(sprintf('Fall %d: %s. Abstand: %1.2f', i, tt, dist));
+            mm = minmax2([pt1';pt2';Skol_groundtruth_W(1:3,1)';Skol_groundtruth_W(1:3,2)';...
+                          q_W'; q_W'+u_W(:,1)'; q_W'+u_W(:,2)'; q_W'+u_W(:,3)'; q_W'+u_W(:,1)'+u_W(:,2)';...
+                          q_W'+u_W(:,1)'+u_W(:,3)'; q_W'+u_W(:,2)'+u_W(:,3)'; q_W'+u_W(:,1)'+u_W(:,2)'+u_W(:,3)';]');
+            lambda_min = (-2 + mm(:,1) - rg_W)./ug_W;
+            lambda_max = (2 + mm(:,2) - rg_W)./ug_W;
+            lambda = sort([lambda_min;lambda_max]);
+            lambda_min = lambda(3);
+            lambda_max = lambda(4);
+            plot3([rg_W(1)+lambda_min*ug_W(1);rg_W(1)+lambda_max*ug_W(1)], ...
+                  [rg_W(2)+lambda_min*ug_W(2);rg_W(2)+lambda_max*ug_W(2)], ...
+                  [rg_W(3)+lambda_min*ug_W(3);rg_W(3)+lambda_max*ug_W(3)], 'b-');
+            xlim([-2+mm(1,1), 2+mm(1,2)]);
+            ylim([-2+mm(2,1), 2+mm(2,2)]);
+            zlim([-2+mm(3,1), 2+mm(3,2)]);
+            drawnow();
           end
-          drawCuboid([cubpar_c', cubpar_l', cubpar_a'], 'FaceColor', 'b', 'FaceAlpha', 0.3);
-          plot3(pt1(1), pt1(2), pt1(3), 'kx', 'MarkerSize', 10, 'LineWidth', 3);
-          plot3(pt2(1), pt2(2), pt2(3), 'r+', 'MarkerSize', 12, 'LineWidth', 3);
-          plot3([Skol_groundtruth_W(1,1);S_tmp(1,1)], [Skol_groundtruth_W(2,1);S_tmp(2,1)], ...
-                [Skol_groundtruth_W(3,1);S_tmp(3,1)], '--c', 'MarkerSize', 5, 'LineWidth', 3);
-          if intersect_truth
-            plot3([Skol_groundtruth_W(1,2);S_tmp(1,2)], [Skol_groundtruth_W(2,2);S_tmp(2,2)], ...
-                  [Skol_groundtruth_W(3,2);S_tmp(3,2)], '--c', 'MarkerSize', 5, 'LineWidth', 3);
-          end
-          xlabel('x in m'); ylabel('y in m'); zlabel('z in m');
-          view(3); grid on; axis equal;
-          title(sprintf('Fall %d: %s. Abstand: %1.2f', i, tt, dist));
-          mm = minmax2([pt1';pt2';Skol_groundtruth_W(1:3,1)';Skol_groundtruth_W(1:3,2)';...
-                        q_W'; q_W'+u_W(:,1)'; q_W'+u_W(:,2)'; q_W'+u_W(:,3)'; q_W'+u_W(:,1)'+u_W(:,2)';...
-                        q_W'+u_W(:,1)'+u_W(:,3)'; q_W'+u_W(:,2)'+u_W(:,3)'; q_W'+u_W(:,1)'+u_W(:,2)'+u_W(:,3)';]');
-          lambda_min = (-2 + mm(:,1) - rg_W)./ug_W;
-          lambda_max = (2 + mm(:,2) - rg_W)./ug_W;
-          lambda = sort([lambda_min;lambda_max]);
-          lambda_min = lambda(3);
-          lambda_max = lambda(4);
-          plot3([rg_W(1)+lambda_min*ug_W(1);rg_W(1)+lambda_max*ug_W(1)], ...
-                [rg_W(2)+lambda_min*ug_W(2);rg_W(2)+lambda_max*ug_W(2)], ...
-                [rg_W(3)+lambda_min*ug_W(3);rg_W(3)+lambda_max*ug_W(3)], 'b-');
-          xlim([-2+mm(1,1), 2+mm(1,2)]);
-          ylim([-2+mm(2,1), 2+mm(2,2)]);
-          zlim([-2+mm(3,1), 2+mm(3,2)]);
-          drawnow();
           %% Prüfung
           % Rechnerische Prüfung der Ergebnisse
           if dist == 0 && ~intersect_truth
