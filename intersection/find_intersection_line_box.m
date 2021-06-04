@@ -92,7 +92,7 @@ function pts = find_intersection_line_box(p, u, q, u1, u2, u3)
       end
       p_krit2 = pt+t2(i_krit+1)*ut;
       pts = [q+R_inv*p_c, [sqrt(d_square); norm(R_inv*p_krit1 - R_inv*p_krit2); NaN]];
-      pts = correct_pts(pts);
+      pts = correct_pts(pts, u);
     elseif u1_parallel % g parallel to u1=const side only
       p_c = p_krit1([2 3]);
       if any(p_c>1+1e-10) || any(p_c<-1e-10) % nicht über Seite
@@ -115,7 +115,7 @@ function pts = find_intersection_line_box(p, u, q, u1, u2, u3)
           p_c = q+R_inv*p_c;
           d = norm(cross(p_c-p,u))/norm(u);
           pts = [p_c, [d; NaN; NaN]];
-          pts = correct_pts(pts);
+          pts = correct_pts(pts, u);
           return;
         end
         switch ind_t2(2)*ind_t2(3)
@@ -132,14 +132,14 @@ function pts = find_intersection_line_box(p, u, q, u1, u2, u3)
         end
         d = norm(cross(p_c-p,u))/norm(u);
         pts = [p_c, [d; NaN; NaN]];
-        pts = correct_pts(pts);
+        pts = correct_pts(pts, u);
       else
         p_c = p_krit1;
         p_krit2 = pt+t2(i_krit+1)*ut;
         d = abs(max(min(p_c(1),0),p_c(1)-1))*norm(u1);
         p_c(1) = min(1,max(0,p_c(1)));
         pts = [q+R_inv*p_c, [d; norm(R_inv*p_krit1 - R_inv*p_krit2); NaN]];
-        pts = correct_pts(pts);
+        pts = correct_pts(pts, u);
       end
     elseif u2_parallel % g parallel to u2=const side only
       p_c = p_krit1([1 3]);
@@ -163,7 +163,7 @@ function pts = find_intersection_line_box(p, u, q, u1, u2, u3)
           p_c = q+R_inv*p_c;
           d = norm(cross(p_c-p,u))/norm(u);
           pts = [p_c, [d; NaN; NaN]];
-          pts = correct_pts(pts);
+          pts = correct_pts(pts, u);
           return;
         end
         switch ind_t2(2)*ind_t2(3)
@@ -180,14 +180,14 @@ function pts = find_intersection_line_box(p, u, q, u1, u2, u3)
         end
         d = norm(cross(p_c-p,u))/norm(u);
         pts = [p_c, [d; NaN; NaN]];
-        pts = correct_pts(pts);
+        pts = correct_pts(pts, u);
       else
         p_c = p_krit1;
         p_krit2 = pt+t2(i_krit+1)*ut;
         d = abs(max(min(p_c(2),0),p_c(2)-1))*norm(u2);
         p_c(2) = min(1,max(0,p_c(2)));
         pts = [q+R_inv*p_c, [d; norm(R_inv*p_krit1 - R_inv*p_krit2); NaN]];
-        pts = correct_pts(pts);
+        pts = correct_pts(pts, u);
       end
     elseif u3_parallel % g parallel to u3=const side only
       p_c = p_krit1([1 2]);
@@ -211,7 +211,7 @@ function pts = find_intersection_line_box(p, u, q, u1, u2, u3)
           p_c = q+R_inv*p_c;
           d = norm(cross(p_c-p,u))/norm(u);
           pts = [p_c, [d; NaN; NaN]];
-          pts = correct_pts(pts);
+          pts = correct_pts(pts, u);
           return;
         end
         switch ind_t2(2)*ind_t2(3)
@@ -228,45 +228,71 @@ function pts = find_intersection_line_box(p, u, q, u1, u2, u3)
         end
         d = norm(cross(p_c-p,u))/norm(u);
         pts = [p_c, [d; NaN; NaN]];
-        pts = correct_pts(pts);
+        pts = correct_pts(pts, u);
       else
         p_c = p_krit1;
         p_krit2 = pt+t2(i_krit+1)*ut;
         d = abs(max(min(p_c(3),0),p_c(3)-1))*norm(u3);
         p_c(3) = min(1,max(0,p_c(3)));
         pts = [q+R_inv*p_c, [d; norm(R_inv*p_krit1 - R_inv*p_krit2); NaN]];
-        pts = correct_pts(pts);
+        pts = correct_pts(pts, u);
       end
     else
-      d_min = norm(cross(p-q,u))/norm(u);
-      p_c = q;
-      [d_min, p_c] = check_corner(q+u1,p,u,p_c,d_min);
-      [d_min, p_c] = check_corner(q+u2,p,u,p_c,d_min);
-      [d_min, p_c] = check_corner(q+u3,p,u,p_c,d_min);
-      [d_min, p_c] = check_corner(q+u1+u2,p,u,p_c,d_min);
-      [d_min, p_c] = check_corner(q+u2+u3,p,u,p_c,d_min);
-      [d_min, p_c] = check_corner(q+u3+u1,p,u,p_c,d_min);
-      [d_min, p_c] = check_corner(q+u1+u2+u3,p,u,p_c,d_min);
-      cu1u = cross(u1,u);
-      cu2u = cross(u2,u);
-      cu3u = cross(u3,u);
-      cucu1u = cross(u,cu1u);
-      cucu2u = cross(u,cu2u);
-      cucu3u = cross(u,cu3u);
-      [d_min, p_c] = check_edge(q, u1, cu1u, cucu1u,p,p_c,d_min);
-      [d_min, p_c] = check_edge(q+u2, u1, cu1u, cucu1u,p,p_c,d_min);
-      [d_min, p_c] = check_edge(q+u3, u1, cu1u, cucu1u,p,p_c,d_min);
-      [d_min, p_c] = check_edge(q+u2+u3, u1, cu1u, cucu1u,p,p_c,d_min);
-      [d_min, p_c] = check_edge(q, u2, cu2u, cucu2u,p,p_c,d_min);
-      [d_min, p_c] = check_edge(q+u1, u2, cu2u, cucu2u,p,p_c,d_min);
-      [d_min, p_c] = check_edge(q+u3, u2, cu2u, cucu2u,p,p_c,d_min);
-      [d_min, p_c] = check_edge(q+u1+u3, u2, cu2u, cucu2u,p,p_c,d_min);
-      [d_min, p_c] = check_edge(q, u3, cu3u, cucu3u,p,p_c,d_min);
-      [d_min, p_c] = check_edge(q+u1, u3, cu3u, cucu3u,p,p_c,d_min);
-      [d_min, p_c] = check_edge(q+u2, u3, cu3u, cucu3u,p,p_c,d_min);
-      [~, p_c] = check_edge(q+u1+u2, u3, cu3u, cucu3u,p,p_c,d_min);
+      sectors = NaN(7,3);
+      krit_start = NaN;
+      krit_end = NaN;
+      for j=1:6
+        i_sec = ceil(ind_t2(j)/2);
+        if isnan(sectors(j+1,i_sec))
+          sectors(j+1:7,i_sec) = 0;
+          if ind_t2(j) == 2*i_sec-1
+            sectors(1:j,i_sec) = -1;
+          else
+            sectors(1:j,i_sec) = 1;
+          end
+          if all(~isnan(sectors(j+1,:)))
+            krit_end = j;
+            break;
+          end
+        else
+          if ind_t2(j) == 2*i_sec-1
+            sectors(j+1:7,i_sec) = -1;
+          else
+            sectors(j+1:7,i_sec) = 1;
+          end
+          if isnan(krit_start)
+            krit_start = j+1;
+          end
+        end
+      end
+      d_min = Inf;
+      p_c = NaN(3,1);
+      u_ges = [u1,u2,u3];
+      for j=krit_start:krit_end
+        c = q;
+        for k=1:3
+          if sectors(j,k)==1
+            c = c + u_ges(:,k);
+          end
+        end
+        switch sum(abs(sectors(j,:)))
+          case 2
+            if sectors(j,1)==0
+              ui = u1;
+            elseif sectors(j,2)==0
+              ui = u2;
+            else
+              ui = u3;
+            end
+            cuiu = cross(ui,u);
+            cucuiu = cross(u, cuiu);
+            [d_min, p_c] = check_edge(c, ui, cuiu, cucuiu, p, p_c, d_min);
+          case 3
+            [d_min, p_c] = check_corner(c, p, u, p_c, d_min);
+        end
+      end
       pts = [p_c, [norm(cross(p_c-p,u))/norm(u); NaN(2,1)]];
-      pts = correct_pts(pts);
+      pts = correct_pts(pts, u);
     end
   else
     pts = [q+R_inv*p_krit1, q+R_inv*(pt+t2(i_krit+1)*ut)];
@@ -276,7 +302,7 @@ end
 
 % Hilfsfunktion, um zu überprüfen, ob eine Ecke den aktuellen
 % Minmalabstand unterbietet
-function [d_min, p_c] = check_corner(c,p,u,p_c,d_min)
+function [d_min, p_c] = check_corner(c, p, u, p_c, d_min)
   d = norm(cross(p-c,u))/norm(u);
   if d<d_min
     d_min = d;
@@ -286,7 +312,7 @@ end
 
 % Hilfsfunktion, um zu überprüfen, ob eine Kante den aktuellen
 % Minmalabstand unterbietet
-function [d_min, p_c] = check_edge(e, ui, cuiu, cucuiu,p,p_c,d_min)
+function [d_min, p_c] = check_edge(e, ui, cuiu, cucuiu, p, p_c, d_min)
   d = norm((p-e).'*cuiu)/norm(cuiu);
   if d>eps % Wenn die gerade in einer Ebene zur Kante verläuft, ist das Ergebnis mit den Ecken abgedeckt, da ja kein regulärer SP vorliegt
     if d<d_min
@@ -301,7 +327,7 @@ end
 
 % Hilfsfunktion zur Korrektur von Quaderschnittpunkten die nur numerisch
 % außerhalb des Quaders liegen (d<1e-10)
-function pts_out = correct_pts(pts_in)
+function pts_out = correct_pts(pts_in, u)
   if isnan(pts_in(3,2)) && pts_in(1,2) < 1e-10
     if ~isnan(pts_in(2,2))
       pts_out = [pts_in(1:3,1) pts_in(1:3,1)+u*pts_in(2,2)];
