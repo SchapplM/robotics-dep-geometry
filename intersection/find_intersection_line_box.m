@@ -29,7 +29,28 @@ function pts = find_intersection_line_box(p, u, q, u1, u2, u3)
   % Größe geordnet werden. Liegen Schnittpunkte vor, gehören die beiden
   % mittleren Parameter in der Liste zu diesen. Anderenfalls muss der zur
   % gerade nächste Punkt auf dem Würfel berechnet werden. Nach der
-  % Berechnung muss noch die Rücktransformation durchgeführt werden.
+  % Berechnung muss noch die Rücktransformation durchgeführt werden. Um den
+  % nächstgelegenen Punkt zu bestimmen, wird untersucht, in welchen der 27
+  % Quadranten, in die die Ebenen der Seitenflächen des Quaders den Raum
+  % aufteilen die Gerade verlaeuft. Interessant sind nur diejenigen Quadranten
+  % ab dem Verlassen des ersten vollstaendig durchlaufennen Zwischenbereichs
+  % zwischen zwei parallelen Seitenebenen bis zum Eintritt in den letzen
+  % durchlaufenen Zwischenbereich. Denn innerhalb des Zwischenbereiches aendert
+  % sich der Abstand zum Quader in der entsprechenden Richtung nicht. D.h. vor
+  % dem vollstaendigen Durchlaufen des ersten Zwischenbereichs, wird in zwei
+  % Richtungen die Entfernung kleiner, da wir auf den Quader zulaufen und in
+  % einer Richtung wird die Entfernung kleiner oder bleibt gleich, sodass wir
+  % uns auf den Quader zubewegen. Nachdem Eintritt in den letzuten
+  % Zwischenbereich wird die Entfernung in den zwei anderen Richtungen groesser,
+  % waehrend sie in der jeweiligen Richtung gleich bleibt oder zunimmt. D.h. die
+  % dazwischen durchlaufenen Sektoren enthalten den zum Quader naechstgelegenen
+  % Punkt. Drei verschiedene Sektoren sind ausserhalb des Quaders zu betrachten:
+  % ausserhalb aller Zwischenbereiche, der naechste Punkt ist die entsprechende
+  % Ecke, innerhalb eines Zwischenbereiches, der naechste Punkt liegt auf der
+  % Kante der beiden Begrenzungsebenen, die nicht den Zwischenbereich
+  % definieren, in zwei Zwischenbereichen, der Fall kan ignoriert werden, da die
+  % Entfernng in einem solchen Bereich bis zum Rand streng monoton verlaeuft und
+  % der kritische Punkt somit in einem angrenzenden Sektor liegt.
   
   assert(isa(p,'double') && isreal(p) && all(size(p) == [3 1]), ...
     'find_intersection_line_box: p has to be [3x1] double');  
