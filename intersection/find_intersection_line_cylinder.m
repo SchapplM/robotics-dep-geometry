@@ -24,7 +24,7 @@
 % (c) Institut für Regelungstechnik, Universität Hannover
 
 function pts = find_intersection_line_cylinder(p, u, p1, p2, r)
-
+  %#codegen
   assert(isa(p,'double') && isreal(p) && all(size(p) == [3 1]), ...
     'find_intersection_line_cylinder: p has to be [3x1] double');
   assert(isa(u,'double') && isreal(u) && all(size(u) == [3 1]), ...

@@ -52,6 +52,7 @@ function pts = find_intersection_line_box(p, u, q, u1, u2, u3)
   % Entfernng in einem solchen Bereich bis zum Rand streng monoton verlaeuft und
   % der kritische Punkt somit in einem angrenzenden Sektor liegt.
   
+  %#codegen
   assert(isa(p,'double') && isreal(p) && all(size(p) == [3 1]), ...
     'find_intersection_line_box: p has to be [3x1] double');  
   assert(isa(u,'double') && isreal(u) && all(size(u) == [3 1]), ...

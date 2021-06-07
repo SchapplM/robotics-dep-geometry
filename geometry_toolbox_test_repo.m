@@ -7,6 +7,8 @@
 % (C) Institut für mechatronische Systeme, Universität Hannover
 
 this_repo_path = fullfile(fileparts(which('geometry_toolbox_path_init.m')));
+mex_all_matlabfcn_in_dir(fullfile(this_repo_path, 'intersection'));
+
 addpath(fullfile(this_repo_path, 'examples_tests'));
 
 test_box_random_surface_point; close all

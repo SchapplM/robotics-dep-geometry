@@ -76,6 +76,11 @@ for k = 1:100
   if abs(d_min2_mex-d_min2) > 1e-9
     error('Ausgabe 4 von collision_capsule_capsule stimmt nicht gegen mex');
   end
+  % Prüfung, ob einer der erkannten Punkte auf der Kapsel liegt
+  [dist_cp1, kol_cp1, pkol_cp1, d_min_cp1] = collision_capsule_sphere(cap, [pts(1:3,1)',0]);
+  if ~(abs(dist_cp1) < 1e-10)
+    error('Keiner der erkannten Punkte liegt auf der Kapsel');
+  end
   if ~raiseerr
     continue;
   end

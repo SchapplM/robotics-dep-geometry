@@ -322,6 +322,12 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
         'Ausgabevariable S_tmp stimmt nicht mit mex-Funktion überein:\n[%s] vs \n[%s]\nAbweichung: %e', ...
         disp_array(S_tmp, '%1.3f'), disp_array(S_tmp2, '%1.3f'), ...
         min(max(abs(S_tmp(~isnan(S_tmp(:))) - S_tmp2(~isnan(S_tmp(:)))),[],'all')));
+      % Prüfung, ob einer der erkannten Punkte auf dem Zylinder liegt
+      [dist_cp1, kol_cp1, pkol_cp1, d_min_cp1] = collision_cylinder_point(cyl_W, pt1');
+      [dist_cp2, kol_cp2, pkol_cp2, d_min_cp2] = collision_cylinder_point(cyl_W, pt2');
+      if ~any(abs([dist_cp1;dist_cp2]) < 1e-10)
+        error('Keiner der erkannten Punkte liegt auf dem Zylinder');
+      end
     end
   end
 end
