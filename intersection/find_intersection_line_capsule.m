@@ -64,7 +64,62 @@ function pts = find_intersection_line_capsule(p, u, p1, p2, r)
   % für die Halbkugel um p2. Danach muss noch geprüft werden (wieder über
   % obiges Skalarprodukt), ob die gefundenen Schnittpunkte in der korrekten
   % Hälfte der Kugel liegen.
+
+  cpp1v  = cross(p-p1,v);
+  z = (cuv.'*cpp1v)^2/(cuv.'*cuv)^2-(cpp1v.'*cpp1v-r^2*(v.'*v))/(cuv.'*cuv);
   
+  % Wenn keine Schnittpunkte vorliegen, muss der Punkt auf der Kapsel
+  % berechnet werden, der der Geraden g1 am nächsten liegt. Dazu werden
+  % wieder die drei Fälle "q jenseits von p1", "q jenseits von p2" und "q
+  % zwischen p1 und p2" unterschieden. Fall 1 und 2: Addiert man zu p die
+  % Projektion von des Vektors von p nach pi auf u, so erhält man den pi
+  % nächstgelegenden Punkt qi auf der Geraden g1. Geht man von pi in Richtung
+  % dieses Punktes (Weite r), so landet man am gesuchten Punkt p_c:
+  % qi = p+(pi-p)*u/u^2*u, p_c = pi+(qi-pi)/|qi-pi|*r
+  % Fall 3: wir kennen die Richtung von q nach g2: u x v. Den Lotfußpunkt
+  % q3 auf g2 können wir analog zu Fall 1/2 berechnen:
+  % q3 = p1+(q-p1)*v/v^2*v von da aus gehen wir um die Länge r in
+  % Richtung (q-q3), um den gesuchten Punkt zu finden.
+  
+  if z < 0 % kein Schnittpunkt liegt vor, wähle nächsten Punkt
+    pc1 = find_next_pkt;
+    pts = [pc1, [norm(cross(pc1-p,u))/norm(u); NaN(2,1)]];
+  else % Schnittpunkte gefunden, auf Korrektheit prüfen und ggf. korrigieren
+    sqrt_z = sqrt(z);
+    s_z = -cuv.'*cpp1v/(cuv.'*cuv);
+    s1  = s_z+sqrt_z;
+    s2  = s_z-sqrt_z;
+    pc1 = p+s1*u;
+    pc2 = p+s2*u;
+    if (pc1-p1).'*v<0 % Schnittpunkt mit Halbkugel um p1 liegt vor
+      pc1 = correct_intersection_k1;
+    elseif (pc1-p2).'*v>0 % Schnittpunkt mit Halbkugel um p2 liegt vor
+      pc1 = correct_intersection_k2;
+    end
+    if (pc2-p1).'*v<0 % Schnittpunkt mit Halbkugel um p1 liegt vor
+      pc2 = correct_intersection_k1;
+    elseif (pc2-p2).'*v>0 % Schnittpunkt mit Halbkugel um p2 liegt vor
+      pc2 = correct_intersection_k2;
+    end
+    pts=[pc1, pc2];
+  end
+  
+  % Hilfsfunktion zum Finden des nächstgelegenen Punktes auf der
+  % Kapseloberfläche
+  function p_out = find_next_pkt
+    if (q-p1).'*v<0
+      q1  = p+(p1-p).'*u/(u.'*u)*u;
+      p_c = p1+(q1-p1)/norm(q1-p1)*r;
+    elseif (q-p2).'*v>0
+      q2  = p+(p2-p).'*u/(u.'*u)*u;
+      p_c = p2+(q2-p2)/norm(q2-p2)*r;
+    else
+      q3  = p1+(q-p1).'*v/(v.'*v)*v;
+      p_c = q3+(q-q3)/norm(q-q3)*r;
+    end
+    p_out=p_c;
+  end
+
   % Hilfsfunktion zur Korrektheitsprüfung und Korrektur der
   % Zylinderschnittpunkte an der Seite p1
   function p_out = correct_intersection_k1
@@ -120,58 +175,6 @@ function pts = find_intersection_line_capsule(p, u, p1, p2, r)
     else
       p_out = NaN(3,1); % Fall nicht vorgesehen
     end
-  end
-
-  cpp1v  = cross(p-p1,v);
-  z = (cuv.'*cpp1v)^2/(cuv.'*cuv)^2-(cpp1v.'*cpp1v-r^2*(v.'*v))/(cuv.'*cuv);
-  % Wenn keine Schnittpunkte vorliegen, muss der Punkt auf der Kapsel
-  % berechnet werden, der der Geraden g1 am nächsten liegt. Dazu werden
-  % wieder die drei Fälle "q jenseits von p1", "q jenseits von p2" und "q
-  % zwischen p1 und p2" unterschieden. Fall 1 und 2: Addiert man zu p die
-  % Projektion von des Vektors von p nach pi auf u, so erhält man den pi
-  % nächstgelegenden Punkt qi auf der Geraden g1. Geht man von pi in Richtung
-  % dieses Punktes (Weite r), so landet man am gesuchten Punkt p_c:
-  % qi = p+(pi-p)*u/u^2*u, p_c = pi+(qi-pi)/|qi-pi|*r
-  % Fall 3: wir kennen die Richtung von q nach g2: u x v. Den Lotfußpunkt
-  % q3 auf g2 können wir analog zu Fall 1/2 berechnen:
-  % q3 = p1+(q-p1)*v/v^2*v von da aus gehen wir um die Länge r in
-  % Richtung (q-q3), um den gesuchten Punkt zu finden.
-  % Hilfsfunktion zum Finden des nächstgelegenen Punktes auf der
-  % Kapseloberfläche
-  function p_out = find_next_pkt
-    if (q-p1).'*v<0
-      q1  = p+(p1-p).'*u/(u.'*u)*u;
-      p_c = p1+(q1-p1)/norm(q1-p1)*r;
-    elseif (q-p2).'*v>0
-      q2  = p+(p2-p).'*u/(u.'*u)*u;
-      p_c = p2+(q2-p2)/norm(q2-p2)*r;
-    else
-      q3  = p1+(q-p1).'*v/(v.'*v)*v;
-      p_c = q3+(q-q3)/norm(q-q3)*r;
-    end
-    p_out=p_c;
-  end
-  if z < 0 % kein Schnittpunkt liegt vor, wähle nächsten Punkt
-    pc1 = find_next_pkt;
-    pts = [pc1, [norm(cross(pc1-p,u))/norm(u); NaN(2,1)]];
-  else % Schnittpunkte gefunden, auf Korrektheit prüfen und ggf. korrigieren
-    sqrt_z = sqrt(z);
-    s_z = -cuv.'*cpp1v/(cuv.'*cuv);
-    s1  = s_z+sqrt_z;
-    s2  = s_z-sqrt_z;
-    pc1 = p+s1*u;
-    pc2 = p+s2*u;
-    if (pc1-p1).'*v<0 % Schnittpunkt mit Halbkugel um p1 liegt vor
-      pc1 = correct_intersection_k1;
-    elseif (pc1-p2).'*v>0 % Schnittpunkt mit Halbkugel um p2 liegt vor
-      pc1 = correct_intersection_k2;
-    end
-    if (pc2-p1).'*v<0 % Schnittpunkt mit Halbkugel um p1 liegt vor
-      pc2 = correct_intersection_k1;
-    elseif (pc2-p2).'*v>0 % Schnittpunkt mit Halbkugel um p2 liegt vor
-      pc2 = correct_intersection_k2;
-    end
-    pts=[pc1, pc2];
   end
 end
   
