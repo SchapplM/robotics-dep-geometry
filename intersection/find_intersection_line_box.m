@@ -13,8 +13,11 @@
 %   vectors to the beneighbouring corners
 % Output:
 % pts [3x2]
-%   intersection points, or nearest point and distance to nearest point
-%   stacked with NaNs, when no intersections exist
+%   intersection points, or nearest point on box and distance to
+%   nearest point as well as line parameter until which the same distance is
+%   kept if line is parallel to side planes stacked with NaNs,
+%   when no intersections exist. The returned values are ordered such that the
+%   value with the smaller s in x = p+s*u is returned in the first column.
 
 % Jonathan Vorndamme, vorndamme@irt.uni-hannover.de, 2016-06
 % (c) Institut für Regelungstechnik, Universität Hannover

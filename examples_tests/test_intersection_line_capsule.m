@@ -9,7 +9,7 @@ close all;
 rng(0);
 
 % Kompiliere alle Funktionen. Dadurch werden Syntax-Fehler erkannt
-% matlabfcn2mex({'find_intersection_line_cylinder'});
+matlabfcn2mex({'find_intersection_line_capsule'});
 %% Teste Kollision aus Zylinder und Gerade
 for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der Geraden
   % Vertausche die Reihenfolge der Punkte, um mehr Code in Test abzudecken.
@@ -19,9 +19,9 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
   elseif j == 3
     cap_0 = [0,0,5, 0,0,0, 1];
   end
-  for i = 5:20 % Schleife über manuelle Testszenarien
-    testtol = 1e-10;
-    mextol = 1e-12;
+  for i = 1:21 % Schleife über manuelle Testszenarien
+    testtol = 1e-7;
+    mextol = 1e-7;
     switch i
       case 1
         ug = [0 0 1]';
@@ -104,7 +104,7 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
       case 14
         ug = [1 0 1]';
         rg = [0 1 7]';
-        S_groundtruth_0 = [-1/sqrt(38) 1/sqrt(38) 6/sqrt(38); sqrt(3) NaN NaN]';
+        S_groundtruth_0 = [-1/sqrt(3) 1/sqrt(3) 5+1/sqrt(3); sqrt(3)-1 NaN NaN]';
         intersect_truth = false;
         tt = 'Gerade windschief tangential am Mantel ausserhalb';
       case 15
@@ -122,7 +122,7 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
       case 17
         ug = [1 0 1]';
         rg = [0 1+1e-11 7]';
-        S_groundtruth_0 = [-1/sqrt(38) 1/sqrt(38) 6/sqrt(38); sqrt(3) NaN NaN]';
+        S_groundtruth_0 = [-1/sqrt(3) 1/sqrt(3) 5+1/sqrt(3); sqrt(3)-1 NaN NaN]';
         intersect_truth = false;
         tt = 'Gerade windschief fast tangential am Mantel ausserhalb';
       case 18
@@ -136,7 +136,7 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
         rg = [0 0 7]';
         S_groundtruth_0 = [-sqrt(2)/2 0 5+sqrt(2)/2; sqrt(2)-1 NaN NaN]';
         intersect_truth = false;
-        tt = 'Gerade windschief jenseits Deckel, Abstand Zylinderachse < r';
+        tt = 'Gerade windschief jenseits Kuppel, Abstand Zylinderachse < r';
       case 20
         ug = [1 0 1]';
         rg = [0 2 7]';
@@ -144,7 +144,13 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
         % berechnet)
         S_groundtruth_0 = [-1/sqrt(6) 2/sqrt(6) 5+1/sqrt(6); sqrt(6)-1 NaN NaN]';
         intersect_truth = false;
-        tt = 'Gerade windschief jenseits Deckel, Abstand Zylinderachse > r';
+        tt = 'Gerade windschief jenseits Kuppel, Abstand Zylinderachse > r';
+      case 21
+        ug = [-1e-12 0 1]';
+        rg = [1 0 2.5]';
+        S_groundtruth_0 = [1 0 0; 1 0 5]';
+        intersect_truth = true;
+        tt = 'Gerade fast parallel zu Mittellinie tangential';
     end
     if j == 2 || j == 4
       ug = -ug;
@@ -177,9 +183,6 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
       ug_W = T_W_0(1:3,1:3)*ug;
       %% Schnitt berechnen
       S_tmp = find_intersection_line_capsule(rg_W, ug_W, cap_W(1:3)', cap_W(4:6)', cap_W(7));
-      if all(~isnan(S_tmp(:)))
-        S_tmp = S_tmp(:,[2 1]);
-      end
       pt1 = S_tmp(:,1);
       pt2 = S_tmp(:,2);
       if any(isnan(S_tmp(:,2)))
@@ -244,11 +247,11 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
         cap_W(4:6)', cap_W(7));
       % prüfe auch für getauschte Punkte, da mex-Funktion Ergebnisse in
       % mindestens einem Fall i umgekehter Reihenfolge lieferte
-%       assert(all(abs(S_tmp(~isnan(S_tmp(:))) - S_tmp2(~isnan(S_tmp(:)))) < mextol), ...
-%         'Ausgabevariable S_tmp stimmt nicht mit mex-Funktion überein:\n[%s] vs \n[%s]\nAbweichung: %e', ...
-%         disp_array(S_tmp, '%1.3f'), disp_array(S_tmp2, '%1.3f'), ...
-%         min(max(abs(S_tmp(~isnan(S_tmp(:))) - S_tmp2(~isnan(S_tmp(:)))),[],'all')));
-      % Prüfung, ob einer der erkannten Punkte auf dem Zylinder liegt
+      assert(all(abs(S_tmp(~isnan(S_tmp(:))) - S_tmp2(~isnan(S_tmp(:)))) < mextol), ...
+        'Ausgabevariable S_tmp stimmt nicht mit mex-Funktion überein:\n[%s] vs \n[%s]\nAbweichung: %e', ...
+        disp_array(S_tmp, '%1.3f'), disp_array(S_tmp2, '%1.3f'), ...
+        min(max(abs(S_tmp(~isnan(S_tmp(:))) - S_tmp2(~isnan(S_tmp(:)))),[],'all')));
+      % Prüfung, ob einer der erkannten Punkte auf der Kapsel liegt
       [dist_cp1, kol_cp1, pkol_cp1, d_min_cp1] = collision_capsule_sphere(cap_W, [pt1' 0]);
       [dist_cp2, kol_cp2, pkol_cp2, d_min_cp2] = collision_capsule_sphere(cap_W, [pt2' 0]);
       if ~any(abs([dist_cp1;dist_cp2]) < 1e-10)
