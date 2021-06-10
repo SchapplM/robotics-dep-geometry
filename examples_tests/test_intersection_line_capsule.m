@@ -1,4 +1,4 @@
-% Teste Funktionen für Kollisionsprüfung von Zylinder und Gerade
+% Teste Funktionen für Kollisionsprüfung von Kapsel und Gerade
 
 % Moritz Schappler, moritz.schappler@imes.uni-hannover.de, 2021-02
 % (C) Institut für Mechatronische Systeme, Leibniz Universität Hannover
@@ -10,7 +10,7 @@ rng(0);
 
 % Kompiliere alle Funktionen. Dadurch werden Syntax-Fehler erkannt
 matlabfcn2mex({'find_intersection_line_capsule'});
-%% Teste Kollision aus Zylinder und Gerade
+%% Teste Kollision aus Kapsel und Gerade
 for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der Geraden
   % Vertausche die Reihenfolge der Punkte, um mehr Code in Test abzudecken.
   % Darf keinen Einfluss auf Ergebnis haben

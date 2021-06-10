@@ -10,7 +10,7 @@ rng(0);
 drawmode = 0; % 0 = no draw, 1 = one draw per case, 2 = draw all
 
 % Kompiliere alle Funktionen. Dadurch werden Syntax-Fehler erkannt
-% matlabfcn2mex({'find_intersection_line_box'});
+matlabfcn2mex({'find_intersection_line_box'});
 %% Teste Kollision aus Zylinder und Gerade
 for i = 1:48 % Schleife über manuelle Testszenarien
   testtol = 1e-10;

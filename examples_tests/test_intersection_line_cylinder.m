@@ -9,7 +9,7 @@ close all;
 rng(0);
 
 % Kompiliere alle Funktionen. Dadurch werden Syntax-Fehler erkannt
-% matlabfcn2mex({'find_intersection_line_cylinder'});
+matlabfcn2mex({'find_intersection_line_cylinder'});
 %% Teste Kollision aus Zylinder und Gerade
 for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der Geraden
   % Vertausche die Reihenfolge der Punkte, um mehr Code in Test abzudecken.
@@ -263,7 +263,7 @@ for j = 1:4 % Schleife über Vertauschung der Enden und Richtungsänderung der G
         dist = 0;
       end
       %% Zeichnen
-      change_current_figure(i);clf; hold on;
+      change_current_figure(1);clf; hold on;
       drawCylinder(cyl_W, 'EdgeColor', 'k', 'FaceColor', 'b', 'FaceAlpha', 0.3);
       plot3(pt1(1), pt1(2), pt1(3), 'kx', 'MarkerSize', 10, 'LineWidth', 3);
       plot3(pt2(1), pt2(2), pt2(3), 'r+', 'MarkerSize', 12, 'LineWidth', 3);

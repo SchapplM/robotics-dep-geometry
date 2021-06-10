@@ -12,7 +12,6 @@ clear
 
 % Kompiliere alle Funktionen. Dadurch werden Syntax-Fehler erkannt
 matlabfcn2mex({'find_intersection_line_capsule','collision_capsule_capsule'});
-
 %% Abgleich von find_intersection_line_capsule und collision_capsule_capsule
 % Wenn eine Kapsel als Linie degeneriert (Radius Null, Länge ausreichend),
 % dann müssen beide Funktionen das gleiche Ergebnis haben
