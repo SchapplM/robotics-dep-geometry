@@ -20,31 +20,39 @@ for i = 1:6
   switch i
     case 1
       pt_0 = [0.7,0.2,0.1];
+      dist_groundtruth = NaN;
       kol_groundtruth = false;
       pkol_groundtruth_0 = [0.5, 0.2, 0.1];
       tt = 'Punkt neben Seitenfläche';
     case 2
       pt_0 = [0.7,0.4,0.8];
+      dist_groundtruth = NaN;
       kol_groundtruth = false;
       pkol_groundtruth_0 = [0.5, 0.3, 0.4];
       tt = 'Punkt schräg über Ecke';
     case 3
       pt_0 = [0.2, 0.4, 0.5];
+      dist_groundtruth = NaN;
       kol_groundtruth = false;
       pkol_groundtruth_0 = [0.2, 0.3, 0.4];
       tt = 'Punkt über Kante';
     case 4
       pt_0 = [0.3, 0.2, 0.3];
+      dist_groundtruth = -0.1;
       kol_groundtruth = true;
-      pkol_groundtruth_0 = [0.3, 0.3, 0.3];
+      % Die Lage des Punktes ist nicht eindeutig, da der Abstand zu zwei
+      % Seiten gleich groß ist. Keine Prüfung möglich.
+      pkol_groundtruth_0 = NaN(3,1); % [0.3, 0.3, 0.3];
       tt = 'Punkt im Quader';
     case 5
       pt_0 = [0.5, 0.3, 0.4];
+      dist_groundtruth = NaN;
       kol_groundtruth = true;
       pkol_groundtruth_0 = pt_0;
       tt = 'Punkt auf Ecke';
     case 6
       pt_0 = [0.2, 0.3, 0.4];
+      dist_groundtruth = NaN;
       kol_groundtruth = true;
       pkol_groundtruth_0 = pt_0;
       tt = 'Punkt auf Kante';
@@ -91,9 +99,14 @@ for i = 1:6
       assert(kol == kol_groundtruth, ...
         'Erkannte Kollision stimmt nicht aus händischer Prüfung');
     end
-    assert(all(abs(pkol - pkol_groundtruth)<1e-10), ...
-      'Händisch bestimmter nächster Punkt stimmt nicht mit Berechnung');
-
+    if all(~isnan(pkol_groundtruth))
+      assert(all(abs(pkol - pkol_groundtruth)<1e-10), ...
+        'Händisch bestimmter nächster Punkt stimmt nicht mit Berechnung');
+    end
+    if ~isnan(dist_groundtruth)
+      assert(abs(dist - dist_groundtruth)<1e-10, ...
+        'Händisch bestimmter Abstand stimmt nicht mit Berechnung');
+    end
     % Prüfung gegen Ausgabe der mex-Funktion
     [dist2, kol2, pkol2] = collision_box_point_mex(box, pt);
     assert(abs(dist - dist2) < 1e-12, ...
