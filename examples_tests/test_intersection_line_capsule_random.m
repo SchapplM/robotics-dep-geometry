@@ -12,19 +12,36 @@ clear
 
 % Kompiliere alle Funktionen. Dadurch werden Syntax-Fehler erkannt
 matlabfcn2mex({'find_intersection_line_capsule','collision_capsule_capsule'});
+t1 = tic();
 %% Abgleich von find_intersection_line_capsule und collision_capsule_capsule
 % Wenn eine Kapsel als Linie degeneriert (Radius Null, Länge ausreichend),
 % dann müssen beide Funktionen das gleiche Ergebnis haben
-for k = 1:100
-  % Definition
-  pt1 = [-1;-1;-1] + rand(3,1); % Kapsel Punkt 1
-  pt2 = [ 1; 1; 1] + rand(3,1); % Kapsel Punkt 2
+num_tests_max = 1e4;
+num_tests = 0;
+for k = 1:num_tests_max
+  % Definition der Kapsel (zufällig)
+  pt1 = [-1;-1;-1] + -0.5+rand(3,1); % Kapsel Punkt 1
+  pt2 = [ 1; 1; 1] + -0.5+rand(3,1); % Kapsel Punkt 2
   r = 0.1; % Radius der Kapsel
   cap = [pt1', pt2', r];
   
-  rg = rand(3,1); % Aufpunkt der Geraden
-  ug = rand(3,1); % Richtungsvektor der Geraden
-  cap2 = [rg'-100*ug'/norm(ug), rg'+100*ug'/norm(ug), 0]; % Ersatz-Kapsel ohne Radius
+  rg = -0.5+rand(3,1); % Aufpunkt der Geraden
+  ug = -0.5+rand(3,1); % Richtungsvektor der Geraden
+  % Prüfe Ort des kürzesten Abstands von Gerade und Gerade
+  % (bzgl. Mittellinie der Kapsel)
+  [~, ~, lambda, mu] = distance_line_line([pt1', (pt2-pt1)'/norm((pt2-pt1))], [rg', ug'/norm(ug)]);
+  if abs(lambda) > 10 || abs(mu) > 10
+    % Die Prüfung ist nicht möglich, da der kürzeste Abstand weit außerhalb
+    % der Kapsel liegt. Die Approximation der Kapsel als Linie ist so nicht
+    % möglich. Die Kapsel müsste dann länger sein. Ist aber nicht möglich.
+    continue
+  end
+  num_tests = num_tests + 1;
+  % Ersatz-Kapsel ohne Radius. Die Länge wird relativ groß gewählt, falls
+  % bei fast parallelen Geraden der Schnittpunkt fast im unendlichen liegt.
+  % Eine größere Wahl ist aus numerischen Gründen nicht möglich (Abweichung
+  % bei mex-Aufruf)
+  cap2 = [rg'-1e2*ug'/norm(ug), rg'+1e2*ug'/norm(ug), 0];
   % Berechnung
   pts = find_intersection_line_capsule(rg, ug, pt1, pt2, r);
   if isnan(pts(2,2)) % Nachverarbeitung der Ausgaben
@@ -113,4 +130,6 @@ for k = 1:100
   plot3([pg(1);ph(1)], [pg(2);ph(2)], [pg(3);ph(3)], 'g-');
 end
 
-fprintf('Zwei verschiedene Funktionen für Schnitt Linie/Kapsel miteinander verglichen.\n');
+fprintf(['Zwei verschiedene Funktionen für Schnitt Linie/Kapsel ', ...
+  'miteinander verglichen (für %d/%d Konfigurationen). Dauer: %1.1fs\n'], ...
+  num_tests, num_tests_max, toc(t1));
