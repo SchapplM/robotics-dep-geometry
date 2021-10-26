@@ -19,9 +19,9 @@ test_transform_discs; close all;
 % test_intersection_box; close all
 % test_intersection_functions; close all
 test_intersection_line_box; close all;
-test_intersection_line_capsule close all;
-test_intersection_line_capsule_random close all;
-test_intersection_line_cylinder close all;
+test_intersection_line_capsule; close all;
+test_intersection_line_capsule_random; close all;
+test_intersection_line_cylinder; close all;
 
 test_collision_capsule_capsule; close all;
 test_collision_capsule_sphere; close all;
