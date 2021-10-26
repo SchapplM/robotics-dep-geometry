@@ -18,7 +18,7 @@ test_transform_discs; close all;
 % ausführen). Schlecht für automatische Tests.
 % test_intersection_box; close all
 % test_intersection_functions; close all
-test_intersection_line_box close all;
+test_intersection_line_box; close all;
 test_intersection_line_capsule close all;
 test_intersection_line_capsule_random close all;
 test_intersection_line_cylinder close all;
